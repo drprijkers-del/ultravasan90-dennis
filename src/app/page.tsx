@@ -55,6 +55,14 @@ export default function Home() {
       ? data.weekly.reduce((sum, w) => sum + w.runCount, 0) / data.weekly.length
       : 0;
 
+  // Previous week km + average km/week
+  const prevWeekKm =
+    data.weekly.length >= 2 ? data.weekly[data.weekly.length - 2].totalKm : null;
+  const avgKmPerWeek =
+    data.weekly.length > 0
+      ? data.weekly.reduce((sum, w) => sum + w.totalKm, 0) / data.weekly.length
+      : 0;
+
   return (
     <div className="space-y-5">
       {data.mock && (
@@ -76,6 +84,8 @@ export default function Home() {
           km={h.currentWeek.km}
           runs={h.currentWeek.runs}
           hours={h.currentWeek.hours}
+          prevWeekKm={prevWeekKm}
+          avgKmPerWeek={avgKmPerWeek}
         />
         <LongRunCard lastLongRun={h.lastLongRun} />
         <ConsistencyCard streak={h.consistencyStreak} avgRunsPerWeek={avgRunsPerWeek} />
