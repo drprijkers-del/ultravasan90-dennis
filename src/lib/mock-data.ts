@@ -298,7 +298,8 @@ export function getMockHomeData(): HomeData {
           km: lastLong.distanceKm,
           pace: lastLong.paceMinKm,
           name: lastLong.name,
-          polyline: null,
+          // Mock polyline: ~20km loop near Amersfoort/Vathorst
+          polyline: "o~o~Hwr`]{@uDaByBiBkAcCe@qDRcC~@oBpBkAnC_@nDXpCdApBfBhAlCVpD_@nCmAnBcBhAsCRwCe@oCqAoBcBaAsCUqDd@oCpAoBbBiAhCYnDf@nCnAnBdBbArCXrDa@pCeAnBsBbBcCtAqDd@sDe@sCsAoBeBaAuCQsDh@mCxAkBjBaAxCQtDr@pCvAjBhBx@rCJtD",
         }
       : null,
     consistencyStreak: streak,
