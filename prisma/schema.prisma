@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model StravaToken {
+  id           Int      @id @default(autoincrement())
+  athleteId    BigInt   @unique @map("athlete_id")
+  accessToken  String   @map("access_token")
+  refreshToken String   @map("refresh_token")
+  expiresAt    Int      @map("expires_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("strava_tokens")
+}
+
+model Activity {
+  id                  Int      @id @default(autoincrement())
+  stravaActivityId    BigInt   @unique @map("strava_activity_id")
+  name                String
+  type                String
+  startDate           DateTime @map("start_date")
+  distanceM           Float    @map("distance_m")
+  movingTimeS         Int      @map("moving_time_s")
+  elapsedTimeS        Int?     @map("elapsed_time_s")
+  averageSpeed        Float?   @map("average_speed")
+  averageHeartrate    Float?   @map("average_heartrate")
+  maxHeartrate        Float?   @map("max_heartrate")
+  totalElevationGain  Float?   @map("total_elevation_gain")
+  summaryPolyline     String?  @map("summary_polyline")
+  isLongRun           Boolean  @default(false) @map("is_long_run")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+
+  @@index([startDate])
+  @@index([type])
+  @@map("activities")
+}
+
+model WeeklyStat {
+  id       Int   @id @default(autoincrement())
+  year     Int
+  week     Int
+  totalKm  Float @map("total_km")
+  runCount Int   @map("run_count")
+
+  @@unique([year, week])
+  @@map("weekly_stats")
+}
+
+model MonthlyStat {
+  id       Int   @id @default(autoincrement())
+  year     Int
+  month    Int
+  totalKm  Float @map("total_km")
+  runCount Int   @map("run_count")
+
+  @@unique([year, month])
+  @@map("monthly_stats")
+}
+
+model RacePoint {
+  id         Int      @id @default(autoincrement())
+  timestamp  DateTime
+  lat        Float
+  lng        Float
+  accuracyM  Float?   @map("accuracy_m")
+  speedMps   Float?   @map("speed_mps")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([timestamp])
+  @@map("race_points")
+}
