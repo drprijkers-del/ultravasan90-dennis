@@ -1,31 +1,37 @@
 @import "tailwindcss";
 
-/* ── Premium Dark Theme ──────────────────────────────────── */
+/* ── Warm Dark Theme ───────────────────────────────────── */
 
 :root {
-  /* Backgrounds */
-  --bg-primary: #fafafa;
-  --bg-secondary: #f4f4f5;
+  /* Backgrounds (warm) */
+  --bg-primary: #faf8f5;
+  --bg-secondary: #f4f1ec;
   --bg-card: #ffffff;
-  --bg-card-hover: #fafafa;
-  --bg-inset: #f4f4f5;
+  --bg-card-hover: #faf8f5;
+  --bg-inset: #f2efe9;
 
-  /* Text */
-  --text-primary: #18181b;
-  --text-secondary: #52525b;
-  --text-muted: #a1a1aa;
+  /* Text (warm) */
+  --text-primary: #1a1814;
+  --text-secondary: #524e46;
+  --text-muted: #9e9a91;
 
-  /* Borders */
-  --border-primary: #e4e4e7;
-  --border-secondary: #d4d4d8;
+  /* Borders (warm) */
+  --border-primary: #e2dfd8;
+  --border-secondary: #d4d1c8;
 
-  /* Accent: Emerald */
+  /* Accent: Emerald (progress, success) */
   --accent: #10b981;
   --accent-light: #d1fae5;
   --accent-text: #047857;
   --accent-muted: #6ee7b7;
 
-  /* Accent secondary: Amber */
+  /* Accent: Burnt Orange (energy, CTAs) */
+  --accent-orange: #d96c2c;
+  --accent-orange-light: #fef0e6;
+  --accent-orange-text: #9e4a15;
+  --accent-orange-muted: #b8622e;
+
+  /* Accent secondary: Amber (warnings) */
   --accent-2: #f59e0b;
   --accent-2-light: #fef3c7;
   --accent-2-text: #92400e;
@@ -36,9 +42,9 @@
   --danger: #ef4444;
 
   /* Charts */
-  --chart-grid: #e4e4e7;
+  --chart-grid: #e2dfd8;
   --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-border: #e4e4e7;
+  --chart-tooltip-border: #e2dfd8;
 
   /* Fonts */
   --background: var(--bg-primary);
@@ -47,23 +53,28 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #09090b;
-    --bg-secondary: #18181b;
-    --bg-card: #18181b;
-    --bg-card-hover: #27272a;
-    --bg-inset: #09090b;
+    --bg-primary: #0c0b0a;
+    --bg-secondary: #171614;
+    --bg-card: #1c1b18;
+    --bg-card-hover: #262420;
+    --bg-inset: #13120f;
 
-    --text-primary: #fafafa;
-    --text-secondary: #a1a1aa;
-    --text-muted: #71717a;
+    --text-primary: #f5f2ed;
+    --text-secondary: #9d9a93;
+    --text-muted: #6e6b64;
 
-    --border-primary: #27272a;
-    --border-secondary: #3f3f46;
+    --border-primary: #2a2823;
+    --border-secondary: #3d3a33;
 
     --accent: #34d399;
     --accent-light: #064e3b;
     --accent-text: #6ee7b7;
     --accent-muted: #059669;
+
+    --accent-orange: #e07a3a;
+    --accent-orange-light: #3d2410;
+    --accent-orange-text: #f0a06a;
+    --accent-orange-muted: #b8622e;
 
     --accent-2: #fbbf24;
     --accent-2-light: #78350f;
@@ -73,9 +84,9 @@
     --warning: #fbbf24;
     --danger: #f87171;
 
-    --chart-grid: #27272a;
-    --chart-tooltip-bg: #18181b;
-    --chart-tooltip-border: #3f3f46;
+    --chart-grid: #2a2823;
+    --chart-tooltip-bg: #1c1b18;
+    --chart-tooltip-border: #3d3a33;
 
     --background: var(--bg-primary);
     --foreground: var(--text-primary);
@@ -95,7 +106,13 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-/* ── Skeleton animation ──────────────────────────────────── */
+/* ── Card elevation (replaces borders) ─────────────────── */
+
+.card-elevated {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+
+/* ── Skeleton animation ────────────────────────────────── */
 
 @keyframes skeleton-pulse {
   0%, 100% { opacity: 0.4; }
@@ -106,4 +123,15 @@ body {
   animation: skeleton-pulse 1.8s ease-in-out infinite;
   background: var(--border-primary);
   border-radius: 0.5rem;
+}
+
+/* ── Details/summary styling ───────────────────────────── */
+
+details > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
 }

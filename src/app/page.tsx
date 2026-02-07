@@ -7,7 +7,7 @@ import { WeekCard } from "@/components/home/week-card";
 import { LongRunCard } from "@/components/home/longrun-card";
 import { ConsistencyCard } from "@/components/home/consistency-card";
 import { TotalCard } from "@/components/home/total-card";
-import { HomeChart } from "@/components/home/home-chart";
+import { WeeklyOverview } from "@/components/home/weekly-overview";
 import { CTAButtons } from "@/components/home/cta-buttons";
 import { HeroSkeleton, CardSkeleton, ChartSkeleton } from "@/components/skeleton";
 import type { StatsResponse } from "@/lib/types";
@@ -25,7 +25,7 @@ export default function Home() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) px-6 py-12 text-center text-(--danger)">
+      <div className="card-elevated rounded-xl bg-(--bg-card) px-6 py-12 text-center text-(--danger)">
         Fout bij laden: {error}
       </div>
     );
@@ -35,7 +35,7 @@ export default function Home() {
     return (
       <div className="space-y-6">
         <HeroSkeleton />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
           <CardSkeleton />
           <CardSkeleton />
           <CardSkeleton />
@@ -64,7 +64,7 @@ export default function Home() {
       : 0;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-8">
       {data.mock && (
         <div className="rounded-lg bg-(--accent-2-light) px-4 py-3 text-sm text-(--accent-2-text)">
           Demo modus — Strava niet geconfigureerd. Dummy data wordt getoond.
@@ -79,7 +79,7 @@ export default function Home() {
 
       <StatusBadge status={h.status} rollingAvgKm={h.rollingAvgKm} />
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
         <WeekCard
           km={h.currentWeek.km}
           runs={h.currentWeek.runs}
@@ -97,7 +97,7 @@ export default function Home() {
         />
       </div>
 
-      <HomeChart data={data.weekly} />
+      <WeeklyOverview data={data.weekly} />
 
       <CTAButtons />
     </div>

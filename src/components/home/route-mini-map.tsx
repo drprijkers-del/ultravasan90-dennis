@@ -37,7 +37,7 @@ export default function RouteMiniMap({ polyline }: Props) {
     // Draw route
     const latLngs: L.LatLngExpression[] = coords.map(([lat, lng]) => [lat, lng]);
     const line = L.polyline(latLngs, {
-      color: "#34d399",
+      color: "#e07a3a",
       weight: 3,
       opacity: 0.9,
     }).addTo(map);
@@ -71,5 +71,5 @@ export default function RouteMiniMap({ polyline }: Props) {
     };
   }, [polyline]);
 
-  return <div ref={containerRef} className="h-28 w-full rounded-lg" />;
+  return <div ref={containerRef} className="h-32 w-full rounded-lg" />;
 }

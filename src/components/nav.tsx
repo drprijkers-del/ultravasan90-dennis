@@ -16,10 +16,10 @@ export function Nav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="border-b border-(--border-primary) bg-(--bg-card)">
+    <nav className="bg-(--bg-card) shadow-[0_1px_0_rgba(0,0,0,0.15)]">
       <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" className="text-lg font-bold tracking-tight">
-          <span className="text-(--accent)">Heisenberg</span>{" "}
+          <span className="text-(--accent-orange)">Heisenberg</span>{" "}
           <span className="text-(--text-primary)">Endurance Lab</span>
         </Link>
 
@@ -31,7 +31,7 @@ export function Nav() {
               href={link.href}
               className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                 pathname === link.href
-                  ? "bg-(--accent-light) text-(--accent-text)"
+                  ? "bg-(--accent-orange-light) text-(--accent-orange-text)"
                   : "text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >
@@ -68,7 +68,7 @@ export function Nav() {
               onClick={() => setOpen(false)}
               className={`block rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
                 pathname === link.href
-                  ? "bg-(--accent-light) text-(--accent-text)"
+                  ? "bg-(--accent-orange-light) text-(--accent-orange-text)"
                   : "text-(--text-secondary) hover:text-(--text-primary)"
               }`}
             >

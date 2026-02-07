@@ -16,7 +16,11 @@ export function StatusBadge({ status, rollingAvgKm }: Props) {
           : "bg-(--accent-2-light) text-(--accent-2-text)"
       }`}
     >
-      <span className="text-base">{onTrack ? "\u2705" : "\u26A0\uFE0F"}</span>
+      <span
+        className={`h-2 w-2 shrink-0 rounded-full ${
+          onTrack ? "bg-(--accent)" : "bg-(--accent-2)"
+        }`}
+      />
       <span className="font-medium">
         {onTrack ? "Op schema" : "Achter op schema"}
       </span>

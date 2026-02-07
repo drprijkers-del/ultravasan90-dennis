@@ -8,7 +8,7 @@ interface StatCardProps {
 
 export function StatCard({ title, value, subtitle, accent, icon }: StatCardProps) {
   return (
-    <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-4 sm:p-5">
+    <div className="card-elevated rounded-xl bg-(--bg-card) p-4 sm:p-5">
       <div className="flex items-start justify-between">
         <p className="text-xs font-medium text-(--text-muted) sm:text-sm">
           {title}

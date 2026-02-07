@@ -8,12 +8,12 @@ interface Props {
 
 export function WeekCard({ km, runs, hours, prevWeekKm, avgKmPerWeek }: Props) {
   return (
-    <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-4 sm:p-5">
+    <div className="card-elevated rounded-xl bg-(--bg-card) p-4 sm:p-5">
       <p className="text-xs font-medium uppercase tracking-wider text-(--text-muted)">
         Deze week
       </p>
       <div className="mt-3 flex items-baseline gap-3">
-        <span className="text-2xl font-bold text-(--accent) sm:text-3xl">
+        <span className="text-3xl font-bold text-(--accent-orange) sm:text-4xl">
           {km} km
         </span>
       </div>
@@ -21,7 +21,7 @@ export function WeekCard({ km, runs, hours, prevWeekKm, avgKmPerWeek }: Props) {
         <span>{runs} runs</span>
         <span>{hours.toFixed(1)} uur</span>
       </div>
-      <div className="mt-3 border-t border-(--border-primary) pt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-(--text-muted)">
+      <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-xs text-(--text-muted)">
         {prevWeekKm !== null && (
           <span>Vorige week: {prevWeekKm} km</span>
         )}

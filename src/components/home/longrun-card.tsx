@@ -1,10 +1,10 @@
 import dynamic from "next/dynamic";
-import { formatPace } from "@/lib/race-config";
+import { formatPace, LONGRUN_KM } from "@/lib/race-config";
 
 const RouteMiniMap = dynamic(() => import("./route-mini-map"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-28 items-center justify-center rounded-lg bg-(--bg-inset)">
+    <div className="flex h-32 items-center justify-center rounded-lg bg-(--bg-inset)">
       <span className="text-xs text-(--text-muted)">Kaart laden...</span>
     </div>
   ),
@@ -23,12 +23,15 @@ interface Props {
 export function LongRunCard({ lastLongRun }: Props) {
   if (!lastLongRun) {
     return (
-      <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-4 sm:p-5">
+      <div className="card-elevated rounded-xl bg-(--bg-card) p-4 sm:p-5">
         <p className="text-xs font-medium uppercase tracking-wider text-(--text-muted)">
           Laatste longrun
+          <span className="ml-2 normal-case tracking-normal text-[10px] opacity-70">
+            ({LONGRUN_KM}+ km)
+          </span>
         </p>
         <p className="mt-4 text-sm text-(--text-secondary)">
-          Nog geen longrun deze cyclus
+          Nog geen longrun ({LONGRUN_KM}+ km) geregistreerd.
         </p>
       </div>
     );
@@ -42,9 +45,12 @@ export function LongRunCard({ lastLongRun }: Props) {
   });
 
   return (
-    <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-4 sm:p-5">
+    <div className="card-elevated rounded-xl bg-(--bg-card) p-4 sm:p-5">
       <p className="text-xs font-medium uppercase tracking-wider text-(--text-muted)">
         Laatste longrun
+        <span className="ml-2 normal-case tracking-normal text-[10px] opacity-70">
+          ({LONGRUN_KM}+ km)
+        </span>
       </p>
       <div className="mt-3 flex items-baseline gap-3">
         <span className="text-2xl font-bold text-(--text-primary) sm:text-3xl">
@@ -59,7 +65,7 @@ export function LongRunCard({ lastLongRun }: Props) {
       </p>
 
       {/* Mini route map */}
-      {lastLongRun.polyline && (
+      {lastLongRun.polyline && lastLongRun.polyline.length > 10 && (
         <div className="mt-3 overflow-hidden rounded-lg">
           <RouteMiniMap polyline={lastLongRun.polyline} />
         </div>
