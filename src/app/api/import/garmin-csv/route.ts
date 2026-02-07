@@ -75,7 +75,7 @@ function parseCSVToRows(text: string): { headers: string[]; rows: RowData[] } {
 function parseXLSXToRows(buffer: ArrayBuffer): { headers: string[]; rows: RowData[] } {
   const workbook = XLSX.read(buffer, { type: "array" });
   const sheet = workbook.Sheets[workbook.SheetNames[0]];
-  const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, { header: 1 }) as unknown[][];
+  const rawRows = XLSX.utils.sheet_to_json(sheet, { header: 1 }) as unknown as unknown[][];
 
   if (!rawRows.length) return { headers: [], rows: [] };
 
