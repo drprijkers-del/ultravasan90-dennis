@@ -3,25 +3,27 @@ interface StatCardProps {
   value: string | number;
   subtitle?: string;
   accent?: boolean;
+  icon?: React.ReactNode;
 }
 
-export function StatCard({ title, value, subtitle, accent }: StatCardProps) {
+export function StatCard({ title, value, subtitle, accent, icon }: StatCardProps) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-      <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-        {title}
-      </p>
+    <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-4 sm:p-5">
+      <div className="flex items-start justify-between">
+        <p className="text-xs font-medium text-(--text-muted) sm:text-sm">
+          {title}
+        </p>
+        {icon && <span className="text-lg text-(--text-muted)">{icon}</span>}
+      </div>
       <p
-        className={`mt-1 text-3xl font-bold tracking-tight ${
-          accent
-            ? "text-emerald-600 dark:text-emerald-400"
-            : "text-zinc-900 dark:text-zinc-100"
+        className={`mt-1 text-2xl font-bold tracking-tight sm:text-3xl ${
+          accent ? "text-(--accent)" : "text-(--text-primary)"
         }`}
       >
         {value}
       </p>
       {subtitle && (
-        <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        <p className="mt-1 text-xs text-(--text-muted) sm:text-sm">
           {subtitle}
         </p>
       )}

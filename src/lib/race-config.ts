@@ -9,6 +9,13 @@ export const RACE_DISTANCE_KM = 92;
 export const TRAINING_TARGET_KM = 3000;
 export const TRAINING_START_DATE = new Date("2025-11-01");
 
+// Training targets
+export const TARGET_BAND = { min: 45, max: 65 } as const; // weekly km
+export const LONGRUN_KM = 15;
+export const CONSISTENCY_RUNS = 3; // min runs per week for streak
+export const SAFE_DELAY_MINUTES = 2;
+export const EARTH_CIRCUMFERENCE_KM = 40075;
+
 export type TrainingPhase = "in_training" | "race_day" | "finished";
 
 export function getTrainingPhase(): TrainingPhase {
@@ -38,6 +45,7 @@ export function getCountdown() {
 }
 
 export function formatPace(minPerKm: number): string {
+  if (!minPerKm || minPerKm <= 0) return "\u2014";
   const mins = Math.floor(minPerKm);
   const secs = Math.round((minPerKm - mins) * 60);
   return `${mins}:${secs.toString().padStart(2, "0")}`;
@@ -47,4 +55,14 @@ export function formatDuration(minutes: number): string {
   const h = Math.floor(minutes / 60);
   const m = Math.round(minutes % 60);
   return h > 0 ? `${h}u ${m}m` : `${m}m`;
+}
+
+export function distanceFunFact(km: number): string {
+  if (km >= 42) return "Dat is een marathon!";
+  if (km >= 30) return "Amsterdam \u2192 Zandvoort en terug";
+  if (km >= 20) return "Amsterdam \u2192 Haarlem";
+  if (km >= 15) return "Rondje Amersfoort Vathorst";
+  if (km >= 10) return "Centraal \u2192 Amstelveen";
+  if (km >= 5) return "Rondje Vondelpark";
+  return "Lekker gelopen!";
 }

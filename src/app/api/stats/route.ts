@@ -6,7 +6,14 @@ import {
   getMockMonthlyData,
   getMockLongRuns,
   getMockSummary,
+  getMockHomeData,
+  getMockActivities,
 } from "@/lib/mock-data";
+import {
+  distanceFunFact,
+  TARGET_BAND,
+  EARTH_CIRCUMFERENCE_KM,
+} from "@/lib/race-config";
 
 export const revalidate = 60;
 
@@ -22,6 +29,8 @@ export async function GET() {
       summary: getMockSummary(),
       yearBreakdown: [],
       locations: [],
+      homeData: getMockHomeData(),
+      activities: getMockActivities(),
     });
   }
 
@@ -165,9 +174,128 @@ export async function GET() {
       totalRuns: Number(l.cnt),
     }));
 
+    // --- homeData ---
+
+    // Current ISO week activities
+    const currentWeekRaw: Array<{
+      total_km: number; run_count: bigint; total_time_min: number;
+    }> = await prisma.$queryRaw`
+      SELECT
+        COALESCE(ROUND((SUM(distance_m)/1000)::numeric,1)::float,0) AS total_km,
+        COUNT(*)::bigint AS run_count,
+        COALESCE(ROUND((SUM(moving_time_s)/60.0)::numeric,1)::float,0) AS total_time_min
+      FROM activities
+      WHERE type='Run'
+        AND EXTRACT(ISOYEAR FROM start_date) = EXTRACT(ISOYEAR FROM CURRENT_DATE)
+        AND EXTRACT(WEEK FROM start_date) = EXTRACT(WEEK FROM CURRENT_DATE)
+    `;
+
+    const cw = currentWeekRaw[0];
+    const cwKm = cw?.total_km ?? 0;
+    const cwRuns = Number(cw?.run_count ?? 0);
+    const cwHours = Math.round((cw?.total_time_min ?? 0) / 60 * 10) / 10;
+
+    // Last long run
+    const lastLongRunRecord = await prisma.activity.findFirst({
+      where: { isLongRun: true, type: "Run" },
+      orderBy: { startDate: "desc" },
+    });
+
+    let lastLongRun: {
+      date: string; km: number; pace: number; funFact: string;
+    } | null = null;
+
+    if (lastLongRunRecord) {
+      const lrKm = Math.round((lastLongRunRecord.distanceM / 1000) * 10) / 10;
+      const lrPace =
+        lastLongRunRecord.averageSpeed && lastLongRunRecord.averageSpeed > 0
+          ? Math.round((1000 / 60 / lastLongRunRecord.averageSpeed) * 100) / 100
+          : 0;
+      lastLongRun = {
+        date: lastLongRunRecord.startDate.toISOString().split("T")[0],
+        km: lrKm,
+        pace: lrPace,
+        funFact: distanceFunFact(lrKm),
+      };
+    }
+
+    // Consistency streak: count consecutive weeks from end with runCount >= 3
+    let consistencyStreak = 0;
+    for (let i = weekly.length - 1; i >= 0; i--) {
+      if (weekly[i].runCount >= 3) {
+        consistencyStreak++;
+      } else {
+        break;
+      }
+    }
+
+    // Total since Nov (use already-computed summary.totalKm)
+    const totalSinceNov = {
+      km: summary.totalKm,
+      pctEarth: Math.round((summary.totalKm / EARTH_CIRCUMFERENCE_KM) * 100 * 1000) / 1000,
+    };
+
+    // 4-week rolling average from last 4 entries in weekly
+    const last4Weeks = weekly.slice(-4);
+    const rollingAvgKm =
+      last4Weeks.length > 0
+        ? Math.round(
+            (last4Weeks.reduce((sum, w) => sum + w.totalKm, 0) / last4Weeks.length) * 10
+          ) / 10
+        : 0;
+
+    const status: "op_schema" | "achter_op_schema" =
+      rollingAvgKm >= TARGET_BAND.min ? "op_schema" : "achter_op_schema";
+
+    const homeData = {
+      currentWeek: {
+        km: cwKm,
+        runs: cwRuns,
+        hours: cwHours,
+        funFact: distanceFunFact(cwKm),
+      },
+      lastLongRun,
+      consistencyStreak,
+      totalSinceNov,
+      status,
+      rollingAvgKm,
+    };
+
+    // --- activities (all runs in training period) ---
+    const allActivities = await prisma.activity.findMany({
+      where: { type: "Run", startDate: { gte: new Date(TRAINING_START) } },
+      orderBy: { startDate: "desc" },
+    });
+
+    const activities = allActivities.map((a) => {
+      const km = Math.round((a.distanceM / 1000) * 10) / 10;
+      const movingTimeMin = Math.round(a.movingTimeS / 60);
+      const paceMinKm =
+        a.averageSpeed && a.averageSpeed > 0
+          ? Math.round((1000 / 60 / a.averageSpeed) * 100) / 100
+          : 0;
+      const dayOfWeek = a.startDate.getUTCDay(); // 0 = Sunday
+
+      return {
+        id: a.id,
+        date: a.startDate.toISOString().split("T")[0],
+        name: a.name,
+        distanceKm: km,
+        movingTimeMin,
+        paceMinKm,
+        heartrate: a.averageHeartrate ?? null,
+        maxHeartrate: a.maxHeartrate ?? null,
+        elevation: a.totalElevationGain ?? null,
+        isLongRun: a.isLongRun,
+        isSunday: dayOfWeek === 0,
+        dayOfWeek,
+        stravaId: String(a.stravaActivityId),
+      };
+    });
+
     return NextResponse.json({
       mock: false, weekly, monthly, longRuns: longRunData, summary,
-      yearBreakdown, locations,
+      yearBreakdown, locations, homeData, activities,
     });
   } catch (error) {
     console.error("Stats error:", error);

@@ -1,21 +1,42 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { ULTRAVASAN_CHECKPOINTS } from "@/lib/mock-data";
+import { RaceStats } from "@/components/race/race-stats";
+import { CheckpointList } from "@/components/race/checkpoint-list";
+import { ReplayToggle } from "@/components/race/replay-toggle";
+import { ConnectionStatus } from "@/components/race/connection-status";
 
 // Dynamic import for Leaflet (no SSR)
-const RaceMap = dynamic(() => import("@/components/race-map"), { ssr: false });
+const RaceMap = dynamic(() => import("@/components/race/race-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[45vh] items-center justify-center bg-(--bg-inset) sm:h-[500px]">
+      <p className="text-sm text-(--text-muted)">Kaart laden...</p>
+    </div>
+  ),
+});
 
 interface RacePoint {
-  id: number;
+  id?: number;
   timestamp: string;
   lat: number;
   lng: number;
-  accuracyM: number | null;
-  speedMps: number | null;
+  accuracyM?: number | null;
+  speedMps?: number | null;
 }
 
+interface ReplayPoint {
+  timestamp: string;
+  lat: number;
+  lng: number;
+  speedMps: number;
+}
+
+// ---------------------------------------------------------------------------
+// Haversine distance (km)
+// ---------------------------------------------------------------------------
 function distanceBetween(
   lat1: number,
   lng1: number,
@@ -33,6 +54,9 @@ function distanceBetween(
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// ---------------------------------------------------------------------------
+// Estimate distance along the route based on nearest checkpoint
+// ---------------------------------------------------------------------------
 function estimateDistanceAlongRoute(lat: number, lng: number): number {
   let minDist = Infinity;
   let closestIdx = 0;
@@ -49,13 +73,38 @@ function estimateDistanceAlongRoute(lat: number, lng: number): number {
   return ULTRAVASAN_CHECKPOINTS[closestIdx].km;
 }
 
+// ---------------------------------------------------------------------------
+// 3-point GPS smoothing for position estimation
+// ---------------------------------------------------------------------------
+function smoothedPosition(points: RacePoint[]): { lat: number; lng: number } | null {
+  if (points.length === 0) return null;
+  const recent = points.slice(-3);
+  return {
+    lat: recent.reduce((s, p) => s + p.lat, 0) / recent.length,
+    lng: recent.reduce((s, p) => s + p.lng, 0) / recent.length,
+  };
+}
+
+// ===========================================================================
+// Page Component
+// ===========================================================================
 export default function RacePage() {
   const [points, setPoints] = useState<RacePoint[]>([]);
   const [connected, setConnected] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
-  const eventSourceRef = useRef<EventSource | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [replayMode, setReplayMode] = useState(false);
 
-  useEffect(() => {
+  const eventSourceRef = useRef<EventSource | null>(null);
+  const replayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const replayDataRef = useRef<ReplayPoint[]>([]);
+  const replayIndexRef = useRef(0);
+
+  // -------------------------------------------------------------------------
+  // SSE connection (live mode)
+  // -------------------------------------------------------------------------
+  const connectSSE = useCallback(() => {
+    if (eventSourceRef.current) return;
+
     const es = new EventSource("/api/race/stream");
     eventSourceRef.current = es;
 
@@ -73,28 +122,121 @@ export default function RacePage() {
           return [...prev, ...newPoints];
         });
         if (data.points.length > 0) {
-          setLastUpdate(data.points[data.points.length - 1].timestamp);
+          setLastUpdate(
+            new Date(data.points[data.points.length - 1].timestamp)
+          );
         }
       }
     };
 
     es.onerror = () => setConnected(false);
-
-    return () => {
-      es.close();
-    };
   }, []);
 
-  const lastPoint = points.length > 0 ? points[points.length - 1] : null;
-  const estimatedKm = lastPoint
-    ? estimateDistanceAlongRoute(lastPoint.lat, lastPoint.lng)
+  const disconnectSSE = useCallback(() => {
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+      eventSourceRef.current = null;
+    }
+    setConnected(false);
+  }, []);
+
+  // -------------------------------------------------------------------------
+  // Replay mode
+  // -------------------------------------------------------------------------
+  const startReplay = useCallback(async () => {
+    // Load replay data if not already cached
+    if (replayDataRef.current.length === 0) {
+      const res = await fetch("/data/replay.json");
+      replayDataRef.current = await res.json();
+    }
+
+    // Reset state
+    replayIndexRef.current = 0;
+    setPoints([]);
+    setLastUpdate(null);
+    setConnected(true);
+
+    // Drip-feed points every 2 seconds
+    replayTimerRef.current = setInterval(() => {
+      const idx = replayIndexRef.current;
+      const data = replayDataRef.current;
+
+      if (idx >= data.length) {
+        // Replay finished
+        if (replayTimerRef.current) clearInterval(replayTimerRef.current);
+        replayTimerRef.current = null;
+        return;
+      }
+
+      const point = data[idx];
+      setPoints((prev) => [
+        ...prev,
+        {
+          id: idx,
+          timestamp: point.timestamp,
+          lat: point.lat,
+          lng: point.lng,
+          speedMps: point.speedMps,
+        },
+      ]);
+      setLastUpdate(new Date(point.timestamp));
+      replayIndexRef.current = idx + 1;
+    }, 2000);
+  }, []);
+
+  const stopReplay = useCallback(() => {
+    if (replayTimerRef.current) {
+      clearInterval(replayTimerRef.current);
+      replayTimerRef.current = null;
+    }
+  }, []);
+
+  // -------------------------------------------------------------------------
+  // Toggle between live / replay
+  // -------------------------------------------------------------------------
+  const handleToggleReplay = useCallback(() => {
+    if (replayMode) {
+      // Switch OFF replay -> go back to live
+      stopReplay();
+      setReplayMode(false);
+      setPoints([]);
+      setLastUpdate(null);
+      connectSSE();
+    } else {
+      // Switch ON replay -> disconnect live, start replay
+      disconnectSSE();
+      setReplayMode(true);
+      startReplay();
+    }
+  }, [replayMode, stopReplay, connectSSE, disconnectSSE, startReplay]);
+
+  // -------------------------------------------------------------------------
+  // Initial SSE connection (live mode by default)
+  // -------------------------------------------------------------------------
+  useEffect(() => {
+    connectSSE();
+    return () => {
+      disconnectSSE();
+      stopReplay();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // -------------------------------------------------------------------------
+  // Derived state
+  // -------------------------------------------------------------------------
+  const smoothed = smoothedPosition(points);
+  const estimatedKm = smoothed
+    ? estimateDistanceAlongRoute(smoothed.lat, smoothed.lng)
     : 0;
   const remainingKm = Math.max(0, 92 - estimatedKm);
 
-  // Estimate ETA based on average speed
-  let etaText = "—";
+  // Determine last point speed for ETA
+  const lastPoint = points.length > 0 ? points[points.length - 1] : null;
+  let etaText = "\u2014";
   if (lastPoint?.speedMps && lastPoint.speedMps > 0 && remainingKm > 0) {
-    const hoursRemaining = (remainingKm * 1000) / lastPoint.speedMps / 3600;
+    const hoursRemaining =
+      (remainingKm * 1000) / lastPoint.speedMps / 3600;
     const etaDate = new Date(
       new Date(lastPoint.timestamp).getTime() + hoursRemaining * 3600000
     );
@@ -104,105 +246,86 @@ export default function RacePage() {
     });
   }
 
+  // Next checkpoint
+  const nextCp = ULTRAVASAN_CHECKPOINTS.find((cp) => cp.km > estimatedKm);
+  const nextCheckpoint = nextCp
+    ? {
+        name: nextCp.name,
+        km: nextCp.km,
+        eta:
+          lastPoint?.speedMps && lastPoint.speedMps > 0
+            ? new Date(
+                new Date(lastPoint.timestamp).getTime() +
+                  ((nextCp.km - estimatedKm) * 1000) /
+                    lastPoint.speedMps /
+                    3600 *
+                    3600000
+              ).toLocaleTimeString("nl-NL", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : undefined,
+      }
+    : null;
+
+  // -------------------------------------------------------------------------
+  // Render
+  // -------------------------------------------------------------------------
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+          <h1 className="text-2xl font-bold text-(--text-primary)">
             Race Day — Ultravasan 90
           </h1>
-          <p className="mt-1 text-sm text-zinc-500">Live tracking</p>
+          <p className="mt-1 text-sm text-(--text-muted)">
+            {replayMode ? "Demo modus — herhaalde route" : "Live tracking"}
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span
-            className={`h-2.5 w-2.5 rounded-full ${
-              connected ? "bg-emerald-500" : "bg-red-500"
-            }`}
+        <div className="flex items-center gap-4">
+          <ConnectionStatus
+            connected={replayMode ? true : connected}
+            lastUpdate={lastUpdate}
           />
-          <span className="text-sm text-zinc-500">
-            {connected ? "Live" : "Verbinding verbroken"}
-          </span>
+          <ReplayToggle active={replayMode} onToggle={handleToggleReplay} />
         </div>
       </div>
 
-      {/* Stats bar */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="text-xs text-zinc-500">Afgelegd</p>
-          <p className="text-xl font-bold text-emerald-600">
-            {estimatedKm.toFixed(1)} km
-          </p>
+      {/* Demo mode banner */}
+      {replayMode && (
+        <div className="rounded-lg border border-(--accent-2) bg-(--accent-2-light) px-4 py-2 text-sm font-medium text-(--accent-2-text)">
+          Demo modus actief — punten worden elke 2 seconden afgespeeld
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="text-xs text-zinc-500">Resterend</p>
-          <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-            {remainingKm.toFixed(1)} km
-          </p>
-        </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="text-xs text-zinc-500">ETA finish</p>
-          <p className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-            {etaText}
-          </p>
-        </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <p className="text-xs text-zinc-500">Laatste update</p>
-          <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            {lastUpdate
-              ? new Date(lastUpdate).toLocaleTimeString("nl-NL")
-              : "Wachten..."}
-          </p>
-        </div>
-      </div>
+      )}
 
       {/* Progress bar */}
-      <div className="h-2 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-800">
+      <div className="h-2 overflow-hidden rounded-full bg-(--bg-inset)">
         <div
-          className="h-full rounded-full bg-emerald-500 transition-all duration-1000"
+          className="h-full rounded-full bg-(--accent) transition-all duration-1000"
           style={{ width: `${Math.min(100, (estimatedKm / 92) * 100)}%` }}
         />
       </div>
 
       {/* Map */}
-      <div className="overflow-hidden rounded-xl border border-zinc-200 dark:border-zinc-800">
-        <RaceMap points={points} />
+      <div className="overflow-hidden rounded-xl border border-(--border-primary)">
+        <RaceMap
+          points={points}
+          className="h-[45vh] w-full sm:h-[500px]"
+        />
       </div>
 
+      {/* Stats */}
+      <RaceStats
+        estimatedKm={estimatedKm}
+        remainingKm={remainingKm}
+        etaFinish={etaText}
+        lastUpdate={lastUpdate}
+        nextCheckpoint={nextCheckpoint}
+      />
+
       {/* Checkpoints */}
-      <div className="rounded-xl border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-950">
-        <h3 className="mb-3 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-          Checkpoints
-        </h3>
-        <div className="space-y-2">
-          {ULTRAVASAN_CHECKPOINTS.map((cp) => {
-            const passed = estimatedKm >= cp.km;
-            return (
-              <div
-                key={cp.name}
-                className="flex items-center justify-between text-sm"
-              >
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`h-2 w-2 rounded-full ${
-                      passed ? "bg-emerald-500" : "bg-zinc-300 dark:bg-zinc-600"
-                    }`}
-                  />
-                  <span
-                    className={
-                      passed
-                        ? "font-medium text-emerald-600 dark:text-emerald-400"
-                        : "text-zinc-600 dark:text-zinc-400"
-                    }
-                  >
-                    {cp.name}
-                  </span>
-                </div>
-                <span className="font-mono text-zinc-400">{cp.km} km</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      <CheckpointList currentKm={estimatedKm} />
     </div>
   );
 }
