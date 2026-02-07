@@ -10,7 +10,6 @@ import {
   getMockActivities,
 } from "@/lib/mock-data";
 import {
-  distanceFunFact,
   TARGET_BAND,
   EARTH_CIRCUMFERENCE_KM,
 } from "@/lib/race-config";
@@ -202,7 +201,7 @@ export async function GET() {
     });
 
     let lastLongRun: {
-      date: string; km: number; pace: number; funFact: string;
+      date: string; km: number; pace: number; name: string; polyline: string | null;
     } | null = null;
 
     if (lastLongRunRecord) {
@@ -215,7 +214,8 @@ export async function GET() {
         date: lastLongRunRecord.startDate.toISOString().split("T")[0],
         km: lrKm,
         pace: lrPace,
-        funFact: distanceFunFact(lrKm),
+        name: lastLongRunRecord.name,
+        polyline: lastLongRunRecord.summaryPolyline ?? null,
       };
     }
 
@@ -252,7 +252,6 @@ export async function GET() {
         km: cwKm,
         runs: cwRuns,
         hours: cwHours,
-        funFact: distanceFunFact(cwKm),
       },
       lastLongRun,
       consistencyStreak,

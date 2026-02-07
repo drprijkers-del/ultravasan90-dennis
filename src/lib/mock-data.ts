@@ -1,7 +1,6 @@
 // Mock data for demo mode — realistic 2026 Ultravasan 90 training
 
 import {
-  distanceFunFact,
   TARGET_BAND,
   EARTH_CIRCUMFERENCE_KM,
   CONSISTENCY_RUNS,
@@ -63,8 +62,8 @@ export interface SummaryData {
 // --- Home data (for dashboard) ---
 
 export interface HomeData {
-  currentWeek: { km: number; runs: number; hours: number; funFact: string };
-  lastLongRun: { date: string; km: number; pace: number; funFact: string } | null;
+  currentWeek: { km: number; runs: number; hours: number };
+  lastLongRun: { date: string; km: number; pace: number; name: string; polyline: string | null } | null;
   consistencyStreak: number;
   totalSinceNov: { km: number; pctEarth: number };
   status: "op_schema" | "achter_op_schema";
@@ -292,14 +291,14 @@ export function getMockHomeData(): HomeData {
       km: currentWeek.totalKm,
       runs: currentWeek.runCount,
       hours: currentHours,
-      funFact: distanceFunFact(currentWeek.totalKm),
     },
     lastLongRun: lastLong
       ? {
           date: lastLong.date,
           km: lastLong.distanceKm,
           pace: lastLong.paceMinKm,
-          funFact: distanceFunFact(lastLong.distanceKm),
+          name: lastLong.name,
+          polyline: null,
         }
       : null,
     consistencyStreak: streak,

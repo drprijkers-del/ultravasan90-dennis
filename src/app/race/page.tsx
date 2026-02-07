@@ -7,6 +7,7 @@ import { RaceStats } from "@/components/race/race-stats";
 import { CheckpointList } from "@/components/race/checkpoint-list";
 import { ReplayToggle } from "@/components/race/replay-toggle";
 import { ConnectionStatus } from "@/components/race/connection-status";
+import { getCountdown, RACE_DATE, RACE_DISTANCE_KM } from "@/lib/race-config";
 
 // Dynamic import for Leaflet (no SSR)
 const RaceMap = dynamic(() => import("@/components/race/race-map"), {
@@ -214,7 +215,11 @@ export default function RacePage() {
   // Initial SSE connection (live mode by default)
   // -------------------------------------------------------------------------
   useEffect(() => {
-    connectSSE();
+    // Only connect SSE when race is active (not in pre-race training phase)
+    const { phase } = getCountdown();
+    if (phase !== "in_training") {
+      connectSSE();
+    }
     return () => {
       disconnectSSE();
       stopReplay();
@@ -269,7 +274,99 @@ export default function RacePage() {
     : null;
 
   // -------------------------------------------------------------------------
-  // Render
+  // Phase detection
+  // -------------------------------------------------------------------------
+  const countdown = getCountdown();
+  const isPreRace = countdown.phase === "in_training";
+  const raceDate = RACE_DATE.toLocaleDateString("nl-NL", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  // -------------------------------------------------------------------------
+  // Render — Pre-race state
+  // -------------------------------------------------------------------------
+  if (isPreRace && !replayMode) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-(--text-primary)">
+              Race Day — Ultravasan 90
+            </h1>
+            <p className="mt-1 text-sm text-(--text-muted)">
+              Live tracking wordt actief op racedag
+            </p>
+          </div>
+          <ReplayToggle active={replayMode} onToggle={handleToggleReplay} />
+        </div>
+
+        {/* Countdown hero */}
+        <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-6 text-center sm:p-10">
+          <p className="text-xs font-medium uppercase tracking-wider text-(--text-muted)">
+            Start over
+          </p>
+          <div className="mt-4 flex items-center justify-center gap-4 sm:gap-6">
+            <div>
+              <span className="text-4xl font-bold text-(--accent) sm:text-5xl">
+                {countdown.days}
+              </span>
+              <p className="mt-1 text-xs text-(--text-muted)">dagen</p>
+            </div>
+            <span className="text-2xl text-(--text-muted)">:</span>
+            <div>
+              <span className="text-4xl font-bold text-(--text-primary) sm:text-5xl">
+                {countdown.hours}
+              </span>
+              <p className="mt-1 text-xs text-(--text-muted)">uur</p>
+            </div>
+            <span className="text-2xl text-(--text-muted)">:</span>
+            <div>
+              <span className="text-4xl font-bold text-(--text-primary) sm:text-5xl">
+                {countdown.minutes}
+              </span>
+              <p className="mt-1 text-xs text-(--text-muted)">min</p>
+            </div>
+          </div>
+          <p className="mt-6 text-sm text-(--text-secondary)">
+            {raceDate} &middot; 05:00 &middot; Sälen → Mora &middot; {RACE_DISTANCE_KM} km
+          </p>
+        </div>
+
+        {/* Map preview (static, no tracking dots) */}
+        <div className="overflow-hidden rounded-xl border border-(--border-primary)">
+          <RaceMap points={[]} className="h-[35vh] w-full sm:h-100" />
+        </div>
+
+        {/* Checkpoints preview */}
+        <CheckpointList currentKm={0} />
+
+        {/* Info */}
+        <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-4 sm:p-5">
+          <h3 className="text-sm font-medium text-(--text-muted)">
+            Hoe werkt live tracking?
+          </h3>
+          <ul className="mt-3 space-y-2 text-sm text-(--text-secondary)">
+            <li>
+              Op racedag wordt Dennis&apos; GPS-positie elke paar minuten bijgewerkt
+            </li>
+            <li>
+              Je ziet zijn voortgang op de kaart met geschatte aankomsttijden
+            </li>
+            <li>
+              Gebruik de &quot;Demo&quot; knop om een voorbeeld van de tracking te bekijken
+            </li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Render — Active race / replay / finished
   // -------------------------------------------------------------------------
   return (
     <div className="space-y-4">
@@ -294,7 +391,7 @@ export default function RacePage() {
 
       {/* Demo mode banner */}
       {replayMode && (
-        <div className="rounded-lg border border-(--accent-2) bg-(--accent-2-light) px-4 py-2 text-sm font-medium text-(--accent-2-text)">
+        <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm font-medium text-amber-400">
           Demo modus actief — punten worden elke 2 seconden afgespeeld
         </div>
       )}

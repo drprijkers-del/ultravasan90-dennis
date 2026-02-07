@@ -5,7 +5,8 @@ interface Props {
     date: string;
     km: number;
     pace: number;
-    funFact: string;
+    name: string;
+    polyline: string | null;
   } | null;
 }
 
@@ -25,6 +26,7 @@ export function LongRunCard({ lastLongRun }: Props) {
 
   const d = new Date(lastLongRun.date);
   const dateStr = d.toLocaleDateString("nl-NL", {
+    weekday: "short",
     day: "numeric",
     month: "short",
   });
@@ -42,10 +44,29 @@ export function LongRunCard({ lastLongRun }: Props) {
           {formatPace(lastLongRun.pace)}/km
         </span>
       </div>
-      <p className="mt-2 text-sm text-(--text-secondary)">{dateStr}</p>
-      <p className="mt-3 border-t border-(--border-primary) pt-3 text-xs text-(--text-muted)">
-        {lastLongRun.funFact}
+      <p className="mt-1 text-sm text-(--text-secondary)">
+        {lastLongRun.name} &middot; {dateStr}
       </p>
+
+      {/* Mini route map via Strava polyline (static image) */}
+      {lastLongRun.polyline && (
+        <div className="mt-3 overflow-hidden rounded-lg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`https://open.mapquestapi.com/staticmap/v5/map?key=&size=400,120&type=dark&shape=${encodeURIComponent(lastLongRun.polyline)}`}
+            alt="Route"
+            className="hidden"
+          />
+          {/* Fallback: colored route representation */}
+          <div className="flex h-16 items-center justify-center rounded-lg bg-(--bg-inset) text-xs text-(--text-muted)">
+            <svg className="mr-2 h-4 w-4 text-(--accent)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Bekijk route op Strava
+          </div>
+        </div>
+      )}
     </div>
   );
 }

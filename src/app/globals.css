@@ -1,23 +1,23 @@
 @import "tailwindcss";
 
-/* ── Premium Light-Dark Theme ────────────────────────────── */
+/* ── Premium Dark Theme ──────────────────────────────────── */
 
 :root {
   /* Backgrounds */
-  --bg-primary: #f8fafc;
-  --bg-secondary: #f1f5f9;
+  --bg-primary: #fafafa;
+  --bg-secondary: #f4f4f5;
   --bg-card: #ffffff;
-  --bg-card-hover: #f8fafc;
-  --bg-inset: #f1f5f9;
+  --bg-card-hover: #fafafa;
+  --bg-inset: #f4f4f5;
 
   /* Text */
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #a1a1aa;
 
   /* Borders */
-  --border-primary: #e2e8f0;
-  --border-secondary: #cbd5e1;
+  --border-primary: #e4e4e7;
+  --border-secondary: #d4d4d8;
 
   /* Accent: Emerald */
   --accent: #10b981;
@@ -36,9 +36,9 @@
   --danger: #ef4444;
 
   /* Charts */
-  --chart-grid: #e2e8f0;
+  --chart-grid: #e4e4e7;
   --chart-tooltip-bg: #ffffff;
-  --chart-tooltip-border: #e2e8f0;
+  --chart-tooltip-border: #e4e4e7;
 
   /* Fonts */
   --background: var(--bg-primary);
@@ -47,18 +47,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #0f172a;
-    --bg-secondary: #1e293b;
-    --bg-card: #1e293b;
-    --bg-card-hover: #334155;
-    --bg-inset: #0f172a;
+    --bg-primary: #09090b;
+    --bg-secondary: #18181b;
+    --bg-card: #18181b;
+    --bg-card-hover: #27272a;
+    --bg-inset: #09090b;
 
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --text-muted: #64748b;
+    --text-primary: #fafafa;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
 
-    --border-primary: #334155;
-    --border-secondary: #475569;
+    --border-primary: #27272a;
+    --border-secondary: #3f3f46;
 
     --accent: #34d399;
     --accent-light: #064e3b;
@@ -73,9 +73,9 @@
     --warning: #fbbf24;
     --danger: #f87171;
 
-    --chart-grid: #334155;
-    --chart-tooltip-bg: #1e293b;
-    --chart-tooltip-border: #475569;
+    --chart-grid: #27272a;
+    --chart-tooltip-bg: #18181b;
+    --chart-tooltip-border: #3f3f46;
 
     --background: var(--bg-primary);
     --foreground: var(--text-primary);

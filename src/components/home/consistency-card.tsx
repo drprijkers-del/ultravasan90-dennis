@@ -1,10 +1,9 @@
-import { CONSISTENCY_RUNS } from "@/lib/race-config";
-
 interface Props {
   streak: number;
+  avgRunsPerWeek: number;
 }
 
-export function ConsistencyCard({ streak }: Props) {
+export function ConsistencyCard({ streak, avgRunsPerWeek }: Props) {
   return (
     <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-4 sm:p-5">
       <p className="text-xs font-medium uppercase tracking-wider text-(--text-muted)">
@@ -16,8 +15,8 @@ export function ConsistencyCard({ streak }: Props) {
         </span>
         <span className="text-sm text-(--text-secondary)">weken op rij</span>
       </div>
-      <p className="mt-3 border-t border-(--border-primary) pt-3 text-xs text-(--text-muted)">
-        Min. {CONSISTENCY_RUNS} runs per week
+      <p className="mt-2 text-sm text-(--text-secondary)">
+        Gem. {avgRunsPerWeek.toFixed(1)} runs/week
       </p>
     </div>
   );

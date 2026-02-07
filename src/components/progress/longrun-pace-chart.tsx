@@ -28,12 +28,12 @@ export function LongRunPaceChart({ data }: Props) {
           <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
           <XAxis
             dataKey="date"
-            tick={{ fontSize: 10, fill: colors.slate.text }}
+            tick={{ fontSize: 10, fill: colors.zinc.text }}
             stroke={gridStroke}
             interval="preserveStartEnd"
           />
           <YAxis
-            tick={{ fontSize: 10, fill: colors.slate.text }}
+            tick={{ fontSize: 10, fill: colors.zinc.text }}
             stroke={gridStroke}
             domain={["auto", "auto"]}
             reversed

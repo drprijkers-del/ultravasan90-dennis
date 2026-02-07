@@ -39,7 +39,7 @@ export function PaceHrChart({ data }: Props) {
           <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
           <XAxis
             dataKey="date"
-            tick={{ fontSize: 10, fill: colors.slate.text }}
+            tick={{ fontSize: 10, fill: colors.zinc.text }}
             stroke={gridStroke}
             interval="preserveStartEnd"
           />

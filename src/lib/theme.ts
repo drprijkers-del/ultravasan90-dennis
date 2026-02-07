@@ -21,11 +21,11 @@ export const colors = {
     primary: "#a78bfa",
     muted: "#7c3aed",
   },
-  slate: {
-    grid: "#334155",
-    gridLight: "#e2e8f0",
-    text: "#94a3b8",
-    textLight: "#64748b",
+  zinc: {
+    grid: "#27272a",
+    gridLight: "#e4e4e7",
+    text: "#a1a1aa",
+    textLight: "#71717a",
   },
 } as const;
 
@@ -37,4 +37,4 @@ export const tooltipStyle = {
   color: "var(--text-primary)",
 } as const;
 
-export const gridStroke = "#334155";
+export const gridStroke = "#27272a";

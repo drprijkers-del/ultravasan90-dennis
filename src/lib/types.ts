@@ -71,13 +71,13 @@ export interface HomeData {
     km: number;
     runs: number;
     hours: number;
-    funFact: string;
   };
   lastLongRun: {
     date: string;
     km: number;
     pace: number;
-    funFact: string;
+    name: string;
+    polyline: string | null;
   } | null;
   consistencyStreak: number;
   totalSinceNov: {

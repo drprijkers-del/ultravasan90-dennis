@@ -24,24 +24,32 @@ const blogEntries = [
 export default function BlogPage() {
   return (
     <div className="space-y-6">
-      {/* Coming soon banner */}
-      <div className="rounded-xl border border-(--accent) bg-(--accent-light) px-5 py-4">
-        <div className="flex items-center gap-3">
-          <span className="rounded-full bg-(--accent) px-3 py-1 text-xs font-bold text-white">
-            Coming soon
-          </span>
-          <p className="text-sm font-medium text-(--accent-text)">
-            Het blog wordt binnenkort gelanceerd met uitgebreide trainingsverslagen.
-          </p>
-        </div>
-      </div>
-
       {/* Page header */}
       <div>
         <h1 className="text-2xl font-bold text-(--text-primary)">Blog</h1>
         <p className="mt-1 text-sm text-(--text-muted)">
           Verhalen, inzichten en lessen van de weg naar Ultravasan 90
         </p>
+      </div>
+
+      {/* Coming soon banner */}
+      <div className="rounded-xl border border-(--accent) bg-(--accent-light) px-5 py-4">
+        <div className="flex items-start gap-3">
+          <span className="shrink-0 rounded-full bg-(--accent) px-3 py-1 text-xs font-bold text-white">
+            Coming soon
+          </span>
+          <div className="space-y-2 text-sm text-(--text-secondary)">
+            <p className="font-medium text-(--text-primary)">
+              Mobile-first blog — schrijf vanuit Strava
+            </p>
+            <p>
+              Binnenkort kun je blogposts toevoegen door een notitie in je
+              Strava-activiteit te schrijven. Begin je beschrijving met{" "}
+              <code className="rounded bg-(--bg-inset) px-1.5 py-0.5 text-xs text-(--accent)">#blog</code>{" "}
+              en het verschijnt automatisch hier.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Blog entry cards */}

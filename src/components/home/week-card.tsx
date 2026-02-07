@@ -2,10 +2,9 @@ interface Props {
   km: number;
   runs: number;
   hours: number;
-  funFact: string;
 }
 
-export function WeekCard({ km, runs, hours, funFact }: Props) {
+export function WeekCard({ km, runs, hours }: Props) {
   return (
     <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-4 sm:p-5">
       <p className="text-xs font-medium uppercase tracking-wider text-(--text-muted)">
@@ -20,9 +19,6 @@ export function WeekCard({ km, runs, hours, funFact }: Props) {
         <span>{runs} runs</span>
         <span>{hours.toFixed(1)} uur</span>
       </div>
-      <p className="mt-3 border-t border-(--border-primary) pt-3 text-xs text-(--text-muted)">
-        {funFact}
-      </p>
     </div>
   );
 }

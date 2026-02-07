@@ -33,11 +33,11 @@ export function MonthlyKmChart({ data }: Props) {
           <CartesianGrid strokeDasharray="3 3" stroke={gridStroke} />
           <XAxis
             dataKey="label"
-            tick={{ fontSize: 10, fill: colors.slate.text }}
+            tick={{ fontSize: 10, fill: colors.zinc.text }}
             stroke={gridStroke}
           />
           <YAxis
-            tick={{ fontSize: 10, fill: colors.slate.text }}
+            tick={{ fontSize: 10, fill: colors.zinc.text }}
             stroke={gridStroke}
             width={40}
             unit=" km"

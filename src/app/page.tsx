@@ -47,6 +47,13 @@ export default function Home() {
   }
 
   const h = data.homeData;
+  const s = data.summary;
+
+  // Compute avg runs/week from weekly data
+  const avgRunsPerWeek =
+    data.weekly.length > 0
+      ? data.weekly.reduce((sum, w) => sum + w.runCount, 0) / data.weekly.length
+      : 0;
 
   return (
     <div className="space-y-5">
@@ -56,7 +63,11 @@ export default function Home() {
         </div>
       )}
 
-      <HeroSection totalKm={data.summary.totalKm} />
+      <HeroSection
+        totalKm={s.totalKm}
+        totalRuns={s.totalRuns}
+        totalHours={s.totalHours}
+      />
 
       <StatusBadge status={h.status} rollingAvgKm={h.rollingAvgKm} />
 
@@ -65,11 +76,15 @@ export default function Home() {
           km={h.currentWeek.km}
           runs={h.currentWeek.runs}
           hours={h.currentWeek.hours}
-          funFact={h.currentWeek.funFact}
         />
         <LongRunCard lastLongRun={h.lastLongRun} />
-        <ConsistencyCard streak={h.consistencyStreak} />
-        <TotalCard km={h.totalSinceNov.km} pctEarth={h.totalSinceNov.pctEarth} />
+        <ConsistencyCard streak={h.consistencyStreak} avgRunsPerWeek={avgRunsPerWeek} />
+        <TotalCard
+          km={h.totalSinceNov.km}
+          pctEarth={h.totalSinceNov.pctEarth}
+          totalRuns={s.totalRuns}
+          totalElevation={s.totalElevation}
+        />
       </div>
 
       <HomeChart data={data.weekly} />
