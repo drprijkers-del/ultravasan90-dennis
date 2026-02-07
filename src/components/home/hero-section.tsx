@@ -79,9 +79,11 @@ export function HeroSection({ totalKm, totalRuns, totalHours }: Props) {
           Eerste editie: 2014.
         </p>
         <p className="mt-2 text-sm leading-relaxed text-(--text-secondary)">
-          Persoonlijke connectie: ik heb een huis in <strong className="text-(--text-primary)">Finnbodarna</strong>,
-          een klein bergdorp midden in het Vasaloppet-gebied. Die regio is mijn
-          tweede thuis &mdash; dus deze race voelt als thuiskomen.
+          <strong className="text-(--accent)">Doel: sub 10 uur</strong> &mdash; wie
+          onder de 10 uur finisht ontvangt een speciale medaille.
+          Ik heb een tweede huis in <strong className="text-(--text-primary)">Finnbodarna</strong>,
+          een klein bergdorp in het Vasaloppet-gebied, dus het parcours is
+          vertrouwd terrein.
         </p>
       </div>
 
