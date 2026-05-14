@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
   const token = request.nextUrl.searchParams.get("hub.verify_token");
   const challenge = request.nextUrl.searchParams.get("hub.challenge");
 
-  if (mode === "subscribe" && token === process.env.STRAVA_VERIFY_TOKEN) {
+  if (mode === "subscribe" && token === (process.env.STRAVA_VERIFY_TOKEN || "").trim()) {
     console.log("Strava webhook verified");
     return NextResponse.json({ "hub.challenge": challenge });
   }

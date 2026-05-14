@@ -8,6 +8,7 @@ import { CheckpointList } from "@/components/race/checkpoint-list";
 import { ReplayToggle } from "@/components/race/replay-toggle";
 import { ConnectionStatus } from "@/components/race/connection-status";
 import { getCountdown, RACE_DATE, RACE_DISTANCE_KM } from "@/lib/race-config";
+import { ElevationProfile } from "@/components/race/elevation-profile";
 
 // Dynamic import for Leaflet (no SSR)
 const RaceMap = dynamic(() => import("@/components/race/race-map"), {
@@ -297,21 +298,22 @@ export default function RacePage() {
             <h1 className="text-2xl font-bold text-(--text-primary)">
               Race Day — Ultravasan 90
             </h1>
-            <p className="mt-1 text-sm text-(--text-muted)">
-              Live tracking wordt actief op racedag
+            <p className="mt-1 max-w-md text-sm leading-relaxed text-(--text-muted)">
+              Op racedag is hier live te volgen waar Dennis zich op het parcours
+              bevindt. 92 km van S&auml;len naar Mora.
             </p>
           </div>
           <ReplayToggle active={replayMode} onToggle={handleToggleReplay} />
         </div>
 
         {/* Countdown hero */}
-        <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-6 text-center sm:p-10">
+        <div className="rounded-xl card-elevated bg-(--bg-card) p-6 text-center sm:p-10">
           <p className="text-xs font-medium uppercase tracking-wider text-(--text-muted)">
-            Start over
+            Live tracking actief op
           </p>
           <div className="mt-4 flex items-center justify-center gap-4 sm:gap-6">
             <div>
-              <span className="text-4xl font-bold text-(--accent) sm:text-5xl">
+              <span className="text-4xl font-bold text-(--accent-orange) sm:text-5xl">
                 {countdown.days}
               </span>
               <p className="mt-1 text-xs text-(--text-muted)">dagen</p>
@@ -336,8 +338,11 @@ export default function RacePage() {
           </p>
         </div>
 
+        {/* Elevation profile */}
+        <ElevationProfile currentKm={0} />
+
         {/* Map preview (static, no tracking dots) */}
-        <div className="overflow-hidden rounded-xl border border-(--border-primary)">
+        <div className="overflow-hidden rounded-xl card-elevated">
           <RaceMap points={[]} className="h-[35vh] w-full sm:h-100" />
         </div>
 
@@ -345,22 +350,10 @@ export default function RacePage() {
         <CheckpointList currentKm={0} />
 
         {/* Info */}
-        <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-4 sm:p-5">
-          <h3 className="text-sm font-medium text-(--text-muted)">
-            Hoe werkt live tracking?
-          </h3>
-          <ul className="mt-3 space-y-2 text-sm text-(--text-secondary)">
-            <li>
-              Op racedag wordt Dennis&apos; GPS-positie elke paar minuten bijgewerkt
-            </li>
-            <li>
-              Je ziet zijn voortgang op de kaart met geschatte aankomsttijden
-            </li>
-            <li>
-              Gebruik de &quot;Demo&quot; knop om een voorbeeld van de tracking te bekijken
-            </li>
-          </ul>
-        </div>
+        <p className="text-sm leading-relaxed text-(--text-muted)">
+          Op racedag wordt Dennis&apos; GPS-positie elke paar minuten bijgewerkt op de kaart,
+          met geschatte aankomsttijden per checkpoint. Gebruik de Demo-knop om een voorbeeld te bekijken.
+        </p>
       </div>
     );
   }
@@ -404,8 +397,11 @@ export default function RacePage() {
         />
       </div>
 
+      {/* Elevation profile */}
+      <ElevationProfile currentKm={estimatedKm} />
+
       {/* Map */}
-      <div className="overflow-hidden rounded-xl border border-(--border-primary)">
+      <div className="overflow-hidden rounded-xl card-elevated">
         <RaceMap
           points={points}
           className="h-[45vh] w-full sm:h-[500px]"

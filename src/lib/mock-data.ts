@@ -63,7 +63,13 @@ export interface SummaryData {
 
 export interface HomeData {
   currentWeek: { km: number; runs: number; hours: number };
-  lastLongRun: { date: string; km: number; pace: number; name: string; polyline: string | null } | null;
+  lastLongRun: {
+    date: string; km: number; pace: number; name: string; polyline: string | null;
+    description: string | null; heartrate: number | null; elevation: number | null; stravaId: string;
+  } | null;
+  lastRegularRun: {
+    date: string; km: number; pace: number; name: string; description: string | null; stravaId: string;
+  } | null;
   consistencyStreak: number;
   totalSinceNov: { km: number; pctEarth: number };
   status: "op_schema" | "achter_op_schema";
@@ -298,10 +304,21 @@ export function getMockHomeData(): HomeData {
           km: lastLong.distanceKm,
           pace: lastLong.paceMinKm,
           name: lastLong.name,
-          // Mock polyline: ~20km loop near Amersfoort/Vathorst
-          polyline: "o~o~Hwr`]{@uDaByBiBkAcCe@qDRcC~@oBpBkAnC_@nDXpCdApBfBhAlCVpD_@nCmAnBcBhAsCRwCe@oCqAoBcBaAsCUqDd@oCpAoBbBiAhCYnDf@nCnAnBdBbArCXrDa@pCeAnBsBbBcCtAqDd@sDe@sCsAoBeBaAuCQsDh@mCxAkBjBaAxCQtDr@pCvAjBhBx@rCJtD",
+          polyline: null,
+          description: "Lekker lange duurloop via de Soesterduinen. Eerste 10 km bewust rustig gehouden, daarna wat opgepikt richting threshold. Voelde goed, benen fris ondanks vorige week.",
+          heartrate: lastLong.heartrate,
+          elevation: lastLong.elevation,
+          stravaId: "mock_longrun_latest",
         }
       : null,
+    lastRegularRun: {
+      date: "2026-02-06",
+      km: 9.5,
+      pace: 5.42,
+      name: "Interval 5x1000m",
+      description: "5x1000m op tempo. Laatste twee echt snel, benen voelden fris. Goed teken na de lange duurloop van zondag.",
+      stravaId: "mock_regular_latest",
+    },
     consistencyStreak: streak,
     totalSinceNov: { km: totalKm, pctEarth },
     status,

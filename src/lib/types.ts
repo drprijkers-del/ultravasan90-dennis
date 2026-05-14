@@ -78,6 +78,18 @@ export interface HomeData {
     pace: number;
     name: string;
     polyline: string | null;
+    description: string | null;
+    heartrate: number | null;
+    elevation: number | null;
+    stravaId: string;
+  } | null;
+  lastRegularRun: {
+    date: string;
+    km: number;
+    pace: number;
+    name: string;
+    description: string | null;
+    stravaId: string;
   } | null;
   consistencyStreak: number;
   totalSinceNov: {

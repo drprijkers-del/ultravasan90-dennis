@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "home": "Home",
+    "progress": "Voortgang",
+    "race": "Race Day"
+  },
+  "home": {
+    "title": "Ultravasan 90",
+    "subtitle": "92 km trail door Dalarna, Zweden",
+    "countdown": {
+      "days": "dagen",
+      "hours": "uren",
+      "min": "min",
+      "raceDay": "RACE DAY!",
+      "finished": "Gefinisht!"
+    },
+    "moreDetails": "Bekijk voortgang",
+    "raceDay": "Race Day",
+    "verdict": {
+      "title": "Zit ik op koers?",
+      "onTrack": "Op koers voor sub-10 uur",
+      "offTrack": "Nog niet op koers voor sub-10 uur",
+      "noData": "Nog te weinig duurlopen voor een prognose",
+      "estFinish": "Geschatte finishtijd",
+      "avgPace": "Gem. duurloop tempo",
+      "belowTarget": "min onder sub-10u",
+      "aboveTarget": "min boven sub-10u",
+      "basedOn": "o.b.v. laatste duurlopen",
+      "whatNow": "Wat kan ik doen",
+      "fullAnalysis": "Volledige analyse"
+    }
+  },
+  "progress": {
+    "title": "Voortgang",
+    "intro": "Gedetailleerde analyse van mijn training richting Ultravasan 90. Volume, tempo, lange duurlopen en een indicatieve beoordeling.",
+    "projection": {
+      "title": "Race Prognose — Sub 10 uur",
+      "estFinish": "Geschatte finishtijd",
+      "avgPace": "Gem. duurloop tempo",
+      "longestRun": "Langste duurloop",
+      "volume4w": "Volume (4w gem.)",
+      "belowTarget": "min onder doel",
+      "aboveTarget": "min boven doel",
+      "target": "doel",
+      "projectionTrend": "Prognose-ontwikkeling",
+      "projectionHelp": "Hoe de geschatte finishtijd zich ontwikkelt naarmate je meer duurlopen doet. Lijn onder de groene streep = sub 10 uur.",
+      "howToRead": "Hoe lees je dit?"
+    },
+    "volume": {
+      "title": "Trainingsbelasting & consistentie",
+      "desc": "Voor sub 10 uur op 92 km trail is een weekvolume van 45–65 km noodzakelijk in de opbouwfase.",
+      "kmPerWeek": "Kilometers per week",
+      "weeksTotal": "weken totaal",
+      "last4Detail": "Laatste 4 weken individueel, oudere weken als gemiddelde.",
+      "targetZone": "Groene zone = doelvolume"
+    },
+    "tempo": {
+      "title": "Tempo & efficiëntie",
+      "desc": "Elke duurloop afgezet tegen het doeltempo. Zelfde tempo bij dalende hartslag = het lichaam levert dezelfde inspanning efficiënter.",
+      "vsTarget": "Duurloop tempo vs. doeltempo",
+      "targetPace": "Doeltempo sub 10h",
+      "lowerIsFaster": "Lager = sneller",
+      "date": "Datum",
+      "distance": "Afstand",
+      "pace": "Tempo",
+      "target": "Doel",
+      "hr": "HR",
+      "status": "Status",
+      "faster": "Sneller",
+      "onTrack": "Op schema",
+      "slightlyAbove": "Iets boven",
+      "aboveTarget": "Boven doel",
+      "olderRuns": "Oudere duurlopen",
+      "trendTitle": "Tempo & hartslag trend"
+    },
+    "readiness": {
+      "title": "Interpretatie (indicatief)",
+      "desc": "Samenvatting van trainingstoestand. Geen eindtijd, geen finishkans — alleen een eerlijk beeld van de trends.",
+      "whatIsThis": "Wat dit is",
+      "whatIsThisText": "Deze beoordeling beschrijft trends in trainingsbelasting en stabiliteit. Het voorspelt geen eindtijd en geen finishkans.",
+      "whatIsNot": "Wat dit niet is",
+      "whatIsNotText": "Dit vervangt geen ervaring, race-dag omstandigheden of mentale factoren. Ultramarathons worden niet gelopen in grafieken.",
+      "positive": "Indicatief positief",
+      "attention": "Aandachtspunten",
+      "insufficient": "Onvoldoende data of consistentie",
+      "statusNotGuarantee": "Status ≠ finishgarantie",
+      "volume4w": "4w gem. volume",
+      "longestRun6w": "Langste run (6w)",
+      "paceStability": "Tempo stabiliteit",
+      "dataBasis": "Data basis",
+      "avgLongRunPace": "Gem. duurloop tempo",
+      "runsOver2h": "Runs >2u",
+      "variation": "variatie (lager = stabieler)",
+      "noRaceSim": "geen race-simulatie",
+      "longRuns": "long runs",
+      "timeOnFeet": "time-on-feet",
+      "noData": "geen data",
+      "vsPrev4w": "vs vorige 4w",
+      "paceStabilityTitle": "Tempo stabiliteit duurlopen",
+      "fatigueTitle": "Stapeling: weekvolume vs. duurloop tempo",
+      "fatigueDesc": "Elke punt = een duurloop. Zelfde tempo bij hogere weekbelasting = positief signaal."
+    },
+    "weekOverview": "Weekoverzicht",
+    "clickToExpand": "Klik op een week om de individuele trainingen te bekijken.",
+    "weeks2025": "2025",
+    "noData": "Geen data gevonden.",
+    "demo": "Demo modus — dummy data wordt getoond."
+  },
+  "race": {
+    "title": "Race Day",
+    "preRace": "Race tracking wordt actief op racedag",
+    "preRaceDesc": "Op 15 augustus 2026 kan je hier live de voortgang volgen van Sälen naar Mora.",
+    "countdown": "Nog",
+    "countdownDays": "dagen tot de start",
+    "elevation": "Hoogteprofiel",
+    "checkpoints": "Checkpoints",
+    "distance": "Afstand",
+    "elapsed": "Verstreken",
+    "remaining": "Resterend",
+    "lastUpdate": "Laatste update",
+    "demo": "Demo modus"
+  },
+  "common": {
+    "loading": "Laden...",
+    "error": "Fout bij laden",
+    "kmPerWeek": "km/week",
+    "minPerKm": "min/km",
+    "weeks": "weken",
+    "longRun": "long run"
+  }
+}

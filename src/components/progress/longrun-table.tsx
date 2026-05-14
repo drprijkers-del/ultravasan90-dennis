@@ -7,46 +7,20 @@ interface Props {
   data: ActivityData[];
 }
 
-function StravaLink({ stravaId }: { stravaId: string }) {
-  return (
-    <a
-      href={`https://www.strava.com/activities/${stravaId}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 text-xs font-medium text-(--accent) hover:underline"
-    >
-      Strava
-      <svg
-        className="h-3 w-3"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-        />
-      </svg>
-    </a>
-  );
-}
-
 export function LongRunTable({ data }: Props) {
   if (data.length === 0) {
     return (
-      <div className="rounded-xl border border-(--border-primary) bg-(--bg-card) p-6 text-center text-sm text-(--text-muted)">
+      <div className="rounded-xl card-elevated bg-(--bg-card) p-6 text-center text-sm text-(--text-muted)">
         Geen long runs gevonden voor deze filters.
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-(--border-primary) bg-(--bg-card)">
+    <div className="rounded-xl card-elevated bg-(--bg-card)">
       <div className="px-4 py-3 sm:px-5">
         <h3 className="text-sm font-medium text-(--text-muted)">
-          Long Runs ({data.length})
+          Lange duurlopen ({data.length})
         </h3>
       </div>
 
@@ -72,9 +46,6 @@ export function LongRunTable({ data }: Props) {
               </th>
               <th className="px-4 py-2.5 text-right text-xs font-medium text-(--text-muted)">
                 Gem. HR
-              </th>
-              <th className="px-4 py-2.5 text-right text-xs font-medium text-(--text-muted)">
-                Strava
               </th>
             </tr>
           </thead>
@@ -102,9 +73,6 @@ export function LongRunTable({ data }: Props) {
                 <td className="px-4 py-2.5 text-right font-mono text-(--text-secondary)">
                   {run.heartrate ? `${Math.round(run.heartrate)}` : "\u2014"}
                 </td>
-                <td className="px-4 py-2.5 text-right">
-                  {run.stravaId && <StravaLink stravaId={run.stravaId} />}
-                </td>
               </tr>
             ))}
           </tbody>
@@ -124,7 +92,7 @@ export function LongRunTable({ data }: Props) {
                   {run.name}
                 </p>
               </div>
-              {run.stravaId && <StravaLink stravaId={run.stravaId} />}
+              <span className="font-mono text-xs text-(--accent-2-text)">{formatPace(run.paceMinKm)}</span>
             </div>
             <div className="mt-2 grid grid-cols-4 gap-2 text-xs">
               <div>

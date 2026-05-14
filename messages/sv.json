@@ -1,0 +1,131 @@
+{
+  "nav": {
+    "home": "Hem",
+    "progress": "Framsteg",
+    "race": "Tävlingsdag"
+  },
+  "home": {
+    "title": "Ultravasan 90",
+    "subtitle": "92 km löpning genom Dalarna, Sverige",
+    "countdown": {
+      "days": "dagar",
+      "hours": "timmar",
+      "min": "min",
+      "raceDay": "TÄVLINGSDAG!",
+      "finished": "Avslutad!"
+    },
+    "moreDetails": "Se framsteg",
+    "raceDay": "Tävlingsdag",
+    "verdict": {
+      "title": "Ligger jag i fas?",
+      "onTrack": "I fas för under 10 timmar",
+      "offTrack": "Inte i fas för under 10 timmar än",
+      "noData": "För få distanspass för en prognos",
+      "estFinish": "Uppskattad sluttid",
+      "avgPace": "Snitt distanstempo",
+      "belowTarget": "min under 10h-målet",
+      "aboveTarget": "min över 10h-målet",
+      "basedOn": "baserat på senaste distanspassen",
+      "whatNow": "Vad kan jag göra",
+      "fullAnalysis": "Fullständig analys"
+    }
+  },
+  "progress": {
+    "title": "Framsteg",
+    "intro": "Detaljerad analys av min träning inför Ultravasan 90. Volym, tempo, långa distanspass och en indikativ bedömning.",
+    "projection": {
+      "title": "Raceprognos — Under 10 timmar",
+      "estFinish": "Uppskattad sluttid",
+      "avgPace": "Snitt distanstempo",
+      "longestRun": "Längsta distanspass",
+      "volume4w": "Volym (4v snitt)",
+      "belowTarget": "min under mål",
+      "aboveTarget": "min över mål",
+      "target": "mål",
+      "projectionTrend": "Prognosutveckling",
+      "projectionHelp": "Hur den uppskattade sluttiden utvecklas med fler distanspass. Linjen under det gröna strecket = under 10 timmar.",
+      "howToRead": "Hur läser du detta?"
+    },
+    "volume": {
+      "title": "Träningsbelastning & kontinuitet",
+      "desc": "För under 10 timmar på 92 km trail krävs en veckovolym på 45–65 km i uppbyggnadsfasen.",
+      "kmPerWeek": "Kilometer per vecka",
+      "weeksTotal": "veckor totalt",
+      "last4Detail": "Senaste 4 veckorna individuellt, äldre veckor som snitt.",
+      "targetZone": "Grön zon = målvolym"
+    },
+    "tempo": {
+      "title": "Tempo & effektivitet",
+      "desc": "Varje distanspass jämfört med måltempot. Samma tempo med lägre puls = kroppen arbetar mer effektivt.",
+      "vsTarget": "Distanstempo vs. måltempo",
+      "targetPace": "Måltempo under 10h",
+      "lowerIsFaster": "Lägre = snabbare",
+      "date": "Datum",
+      "distance": "Distans",
+      "pace": "Tempo",
+      "target": "Mål",
+      "hr": "Puls",
+      "status": "Status",
+      "faster": "Snabbare",
+      "onTrack": "Enligt plan",
+      "slightlyAbove": "Något över",
+      "aboveTarget": "Över mål",
+      "olderRuns": "Äldre distanspass",
+      "trendTitle": "Tempo- & pulstrend"
+    },
+    "readiness": {
+      "title": "Tolkning (indikativ)",
+      "desc": "Sammanfattning av träningstillstånd. Ingen sluttid, ingen finishchans — bara en ärlig bild av trenderna.",
+      "whatIsThis": "Vad detta är",
+      "whatIsThisText": "Denna bedömning beskriver trender i träningsbelastning och stabilitet. Den förutspår ingen sluttid och ingen finishchans.",
+      "whatIsNot": "Vad detta inte är",
+      "whatIsNotText": "Detta ersätter inte erfarenhet, tävlingsförhållanden eller mentala faktorer. Ultramaraton springer man inte i grafer.",
+      "positive": "Indikativt positivt",
+      "attention": "Uppmärksamhetspunkter",
+      "insufficient": "Otillräcklig data eller kontinuitet",
+      "statusNotGuarantee": "Status ≠ finishgaranti",
+      "volume4w": "4v snitt volym",
+      "longestRun6w": "Längsta pass (6v)",
+      "paceStability": "Tempostabilitet",
+      "dataBasis": "Dataunderlag",
+      "avgLongRunPace": "Snitt distanstempo",
+      "runsOver2h": "Pass >2h",
+      "variation": "variation (lägre = stabilare)",
+      "noRaceSim": "ingen tävlingssimulering",
+      "longRuns": "distanspass",
+      "timeOnFeet": "tid på fötterna",
+      "noData": "ingen data",
+      "vsPrev4w": "jmf förra 4v",
+      "paceStabilityTitle": "Tempostabilitet distanspass",
+      "fatigueTitle": "Belastning: veckovolym vs. distanstempo",
+      "fatigueDesc": "Varje punkt = ett distanspass. Samma tempo vid högre veckobelastning = positivt tecken."
+    },
+    "weekOverview": "Veckoöversikt",
+    "clickToExpand": "Klicka på en vecka för att se individuella pass.",
+    "weeks2025": "2025",
+    "noData": "Ingen data hittades.",
+    "demo": "Demoläge — dummydata visas."
+  },
+  "race": {
+    "title": "Tävlingsdag",
+    "preRace": "Racespårning aktiveras på tävlingsdagen",
+    "preRaceDesc": "Den 15 augusti 2026 kan du här följa framstegen live från Sälen till Mora.",
+    "countdown": "Ännu",
+    "countdownDays": "dagar till start",
+    "elevation": "Höjdprofil",
+    "checkpoints": "Kontroller",
+    "distance": "Distans",
+    "elapsed": "Förfluten tid",
+    "remaining": "Återstående",
+    "lastUpdate": "Senast uppdaterad",
+    "demo": "Demoläge"
+  },
+  "common": {
+    "loading": "Laddar...",
+    "error": "Fel vid laddning",
+    "kmPerWeek": "km/vecka",
+    "minPerKm": "min/km",
+    "weeks": "veckor",
+    "longRun": "distanspass"
+  }
+}

@@ -2,35 +2,35 @@
 
 export const colors = {
   emerald: {
-    primary: "#34d399",
-    muted: "#059669",
+    primary: "#059669",
+    muted: "#10b981",
     light: "#6ee7b7",
-    bar: "#34d399",
-    barLight: "#34d39940",
+    bar: "#059669",
+    barLight: "#05966930",
   },
   orange: {
-    primary: "#e07a3a",
+    primary: "#d96c2c",
     muted: "#b8622e",
     light: "#f0a06a",
   },
   amber: {
-    primary: "#fbbf24",
-    muted: "#d97706",
-    light: "#fcd34d",
+    primary: "#d97706",
+    muted: "#b45309",
+    light: "#fbbf24",
   },
   red: {
-    primary: "#f87171",
+    primary: "#dc2626",
     muted: "#ef4444",
   },
   purple: {
-    primary: "#a78bfa",
-    muted: "#7c3aed",
+    primary: "#7c3aed",
+    muted: "#6d28d9",
   },
   zinc: {
-    grid: "#2a2823",
-    gridLight: "#e2dfd8",
-    text: "#9d9a93",
-    textLight: "#6e6b64",
+    grid: "#e5e7eb",
+    gridLight: "#f3f4f6",
+    text: "#6b7280",
+    textLight: "#9ca3af",
   },
 } as const;
 
@@ -42,4 +42,4 @@ export const tooltipStyle = {
   color: "var(--text-primary)",
 } as const;
 
-export const gridStroke = "#2a2823";
+export const gridStroke = "#e5e7eb";

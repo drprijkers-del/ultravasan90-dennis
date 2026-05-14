@@ -33,6 +33,7 @@ model Activity {
   maxHeartrate        Float?   @map("max_heartrate")
   totalElevationGain  Float?   @map("total_elevation_gain")
   summaryPolyline     String?  @map("summary_polyline")
+  description         String?  @map("description")
   isLongRun           Boolean  @default(false) @map("is_long_run")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")

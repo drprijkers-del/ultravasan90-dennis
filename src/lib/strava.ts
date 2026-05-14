@@ -3,6 +3,11 @@ import { prisma } from "./prisma";
 const STRAVA_API = "https://www.strava.com/api/v3";
 const STRAVA_OAUTH = "https://www.strava.com/oauth/token";
 
+// Trim env vars to strip accidental newlines from Vercel dashboard
+const STRAVA_CLIENT_ID = (process.env.STRAVA_CLIENT_ID || "").trim();
+const STRAVA_CLIENT_SECRET = (process.env.STRAVA_CLIENT_SECRET || "").trim();
+const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").trim();
+
 interface StravaTokenResponse {
   access_token: string;
   refresh_token: string;
@@ -23,6 +28,7 @@ interface StravaActivity {
   max_heartrate?: number;
   total_elevation_gain: number;
   map?: { summary_polyline?: string };
+  description?: string;
 }
 
 /**
@@ -33,8 +39,8 @@ export async function exchangeToken(code: string): Promise<StravaTokenResponse> 
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      client_id: process.env.STRAVA_CLIENT_ID,
-      client_secret: process.env.STRAVA_CLIENT_SECRET,
+      client_id: STRAVA_CLIENT_ID,
+      client_secret: STRAVA_CLIENT_SECRET,
       code,
       grant_type: "authorization_code",
     }),
@@ -60,7 +66,7 @@ export async function getAccessToken(): Promise<string> {
   }
 
   // Need to refresh
-  const refreshToken = stored?.refreshToken || process.env.STRAVA_REFRESH_TOKEN;
+  const refreshToken = stored?.refreshToken || (process.env.STRAVA_REFRESH_TOKEN || "").trim();
   if (!refreshToken) {
     throw new Error("No refresh token available. Complete OAuth flow first.");
   }
@@ -69,8 +75,8 @@ export async function getAccessToken(): Promise<string> {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      client_id: process.env.STRAVA_CLIENT_ID,
-      client_secret: process.env.STRAVA_CLIENT_SECRET,
+      client_id: STRAVA_CLIENT_ID,
+      client_secret: STRAVA_CLIENT_SECRET,
       refresh_token: refreshToken,
       grant_type: "refresh_token",
     }),
@@ -151,6 +157,7 @@ export async function upsertActivity(stravaActivity: StravaActivity) {
       maxHeartrate: stravaActivity.max_heartrate ?? null,
       totalElevationGain: stravaActivity.total_elevation_gain,
       summaryPolyline: stravaActivity.map?.summary_polyline ?? null,
+      description: stravaActivity.description ?? null,
       isLongRun: isLongRun(stravaActivity),
     },
     update: {
@@ -163,6 +170,7 @@ export async function upsertActivity(stravaActivity: StravaActivity) {
       maxHeartrate: stravaActivity.max_heartrate ?? null,
       totalElevationGain: stravaActivity.total_elevation_gain,
       summaryPolyline: stravaActivity.map?.summary_polyline ?? null,
+      description: stravaActivity.description ?? null,
       isLongRun: isLongRun(stravaActivity),
     },
   });
@@ -258,6 +266,15 @@ export async function syncAllActivities(after = 0): Promise<number> {
   const runs = activities.filter((a) => a.type === "Run");
 
   for (const run of runs) {
+    // Fetch detailed activity to get description (list endpoint doesn't include it)
+    let description: string | null = null;
+    try {
+      const detailed = await fetchActivity(run.id);
+      description = detailed.description ?? null;
+    } catch {
+      // If detail fetch fails, continue without description
+    }
+
     const startDate = new Date(run.start_date);
     await prisma.activity.upsert({
       where: { stravaActivityId: BigInt(run.id) },
@@ -274,6 +291,7 @@ export async function syncAllActivities(after = 0): Promise<number> {
         maxHeartrate: run.max_heartrate ?? null,
         totalElevationGain: run.total_elevation_gain,
         summaryPolyline: run.map?.summary_polyline ?? null,
+        description,
         isLongRun: isLongRun(run),
       },
       update: {
@@ -286,6 +304,7 @@ export async function syncAllActivities(after = 0): Promise<number> {
         maxHeartrate: run.max_heartrate ?? null,
         totalElevationGain: run.total_elevation_gain,
         summaryPolyline: run.map?.summary_polyline ?? null,
+        description,
         isLongRun: isLongRun(run),
       },
     });
@@ -300,7 +319,7 @@ export async function syncAllActivities(after = 0): Promise<number> {
  */
 export function getAuthUrl(redirectUri: string): string {
   const params = new URLSearchParams({
-    client_id: process.env.STRAVA_CLIENT_ID || "",
+    client_id: STRAVA_CLIENT_ID,
     redirect_uri: redirectUri,
     response_type: "code",
     scope: "activity:read_all",

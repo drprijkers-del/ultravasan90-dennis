@@ -202,6 +202,7 @@ export async function GET() {
 
     let lastLongRun: {
       date: string; km: number; pace: number; name: string; polyline: string | null;
+      description: string | null; heartrate: number | null; elevation: number | null; stravaId: string;
     } | null = null;
 
     if (lastLongRunRecord) {
@@ -216,6 +217,36 @@ export async function GET() {
         pace: lrPace,
         name: lastLongRunRecord.name,
         polyline: lastLongRunRecord.summaryPolyline ?? null,
+        description: lastLongRunRecord.description ?? null,
+        heartrate: lastLongRunRecord.averageHeartrate ?? null,
+        elevation: lastLongRunRecord.totalElevationGain ?? null,
+        stravaId: String(lastLongRunRecord.stravaActivityId),
+      };
+    }
+
+    // Last regular (non-longrun) run
+    const lastRegularRunRecord = await prisma.activity.findFirst({
+      where: { isLongRun: false, type: "Run", startDate: { gte: new Date(TRAINING_START) } },
+      orderBy: { startDate: "desc" },
+    });
+
+    let lastRegularRun: {
+      date: string; km: number; pace: number; name: string; description: string | null; stravaId: string;
+    } | null = null;
+
+    if (lastRegularRunRecord) {
+      const rrKm = Math.round((lastRegularRunRecord.distanceM / 1000) * 10) / 10;
+      const rrPace =
+        lastRegularRunRecord.averageSpeed && lastRegularRunRecord.averageSpeed > 0
+          ? Math.round((1000 / 60 / lastRegularRunRecord.averageSpeed) * 100) / 100
+          : 0;
+      lastRegularRun = {
+        date: lastRegularRunRecord.startDate.toISOString().split("T")[0],
+        km: rrKm,
+        pace: rrPace,
+        name: lastRegularRunRecord.name,
+        description: lastRegularRunRecord.description ?? null,
+        stravaId: String(lastRegularRunRecord.stravaActivityId),
       };
     }
 
@@ -254,6 +285,7 @@ export async function GET() {
         hours: cwHours,
       },
       lastLongRun,
+      lastRegularRun,
       consistencyStreak,
       totalSinceNov,
       status,

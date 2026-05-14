@@ -57,6 +57,13 @@ export function formatDuration(minutes: number): string {
   return h > 0 ? `${h}u ${m}m` : `${m}m`;
 }
 
+// Clock format for finish times, e.g. 585 -> "9:45"
+export function formatClock(minutes: number): string {
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return `${h}:${m.toString().padStart(2, "0")}`;
+}
+
 export function distanceFunFact(km: number): string {
   if (km >= 42) return "Dat is een marathon!";
   if (km >= 30) return "Amsterdam \u2192 Zandvoort en terug";
