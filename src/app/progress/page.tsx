@@ -8,7 +8,6 @@ import { WeeklyKmChart } from "@/components/progress/weekly-km-chart";
 import { PaceHrChart } from "@/components/progress/pace-hr-chart";
 import { WeekSummaryTable } from "@/components/progress/week-summary-table";
 import { RaceProjection } from "@/components/progress/race-projection";
-import { RaceReadinessCard } from "@/components/progress/race-readiness-card";
 
 export default function ProgressPage() {
   const t = useT();
@@ -90,18 +89,6 @@ export default function ProgressPage() {
           </p>
         </div>
         <PaceHrChart data={longRunActivities} />
-      </section>
-
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-lg font-semibold text-(--text-primary)">
-            {t("progress.readiness.title")}
-          </h2>
-          <p className="mt-1 text-sm text-(--text-muted)">
-            {t("progress.readiness.desc")}
-          </p>
-        </div>
-        <RaceReadinessCard weekly={data.weekly} activities={data.activities} />
       </section>
     </div>
   );

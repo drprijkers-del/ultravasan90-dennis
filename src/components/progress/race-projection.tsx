@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   LineChart,
   Line,
@@ -57,6 +58,8 @@ function formatTime(min: number) {
 }
 
 export function RaceProjection({ longRuns, allActivities }: Props) {
+  const [showChart, setShowChart] = useState(false);
+
   // Ensure chronological order (oldest first)
   const sorted = [...longRuns].sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
@@ -163,13 +166,27 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
         </div>
       </div>
 
-      {/* Projection growth over time */}
+      {/* Projection growth over time — collapsed by default. Mounted only when
+          open: Recharts measures 0x0 inside a hidden container and renders blank. */}
       {timeline.length >= 3 && (
         <div className="mt-5">
-          <h4 className="text-xs font-medium text-(--text-muted)">
+          <button
+            onClick={() => setShowChart(!showChart)}
+            className="flex items-center gap-2 text-xs font-medium text-(--text-muted) transition-colors hover:text-(--text-secondary)"
+          >
+            <svg
+              className={`h-3.5 w-3.5 transition-transform ${showChart ? "rotate-90" : ""}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
             Prognose-ontwikkeling
-          </h4>
-          <p className="mt-0.5 mb-3 text-[10px] text-(--text-muted)">
+          </button>
+          {showChart && (
+            <>
+          <p className="mt-2 mb-3 text-[10px] text-(--text-muted)">
             Hoe de geschatte finishtijd zich ontwikkelt naarmate je meer duurlopen doet. Lijn onder de groene streep = sub 10 uur.
           </p>
           <ResponsiveContainer width="100%" height={180}>
@@ -215,6 +232,8 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
               />
             </LineChart>
           </ResponsiveContainer>
+            </>
+          )}
         </div>
       )}
 
