@@ -13,7 +13,9 @@ import {
 import { formatPace, RACE_DISTANCE_KM } from "@/lib/race-config";
 import {
   projectFinishTime,
+  projectFinishFrom,
   AID_STATION_MIN,
+  COURSE_ASCENT_M,
   TARGET_PACE,
   TARGET_TOTAL_MIN,
 } from "@/lib/race-readiness";
@@ -31,14 +33,15 @@ function computeProjectionTimeline(longRuns: ActivityData[]) {
   if (longRuns.length < 3) return [];
   const timeline: Array<{ date: string; projectedMin: number; label: string }> = [];
 
+  // Replay the same projection the headline uses, as it would have read on the
+  // date of each long run — so the chart and the headline can't disagree.
   for (let i = 2; i < longRuns.length; i++) {
-    const window = longRuns.slice(Math.max(0, i - 4), i + 1);
-    const avgPace = window.reduce((s, a) => s + a.paceMinKm, 0) / window.length;
-    const projectedMoving = avgPace * RACE_KM;
-    const projectedTotal = projectedMoving + AID_STATION_MIN;
-    const d = new Date(longRuns[i].date);
+    const asOf = new Date(longRuns[i].date);
+    const projection = projectFinishFrom(longRuns.slice(0, i + 1), asOf);
+    if (!projection.hasData) continue;
+    const projectedTotal = projection.projectedTotalMin;
     timeline.push({
-      date: d.toLocaleDateString("nl-NL", { day: "numeric", month: "short" }),
+      date: asOf.toLocaleDateString("nl-NL", { day: "numeric", month: "short" }),
       projectedMin: Math.round(projectedTotal),
       label: `${Math.floor(projectedTotal / 60)}:${Math.round(projectedTotal % 60).toString().padStart(2, "0")}`,
     });
@@ -66,7 +69,6 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
     return null;
   }
 
-  const recentLongRunCount = projection.runsUsed;
   const avgLongRunPace = projection.avgPace;
 
   // Longest long run (within this training cycle)
@@ -101,8 +103,11 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
         Race Prognose &mdash; Sub 10 uur
       </h3>
       <p className="mt-1 text-xs leading-relaxed text-(--text-muted)">
-        Op basis van de laatste {recentLongRunCount} lange duurlopen.
-        Uitgangspunt: {RACE_KM} km + ~{AID_STATION_MIN} min pauzetijd bij checkpoints.
+        Op basis van je langste duurloop ({projection.basisKm.toFixed(1)} km),
+        doorgerekend naar {RACE_KM} km inclusief verval over die afstand.
+        Uitgangspunt: {COURSE_ASCENT_M} m stijging, grotendeels bosweg en trail,
+        ~{AID_STATION_MIN} min bij de aid stations. Realistische bandbreedte:{" "}
+        {formatTime(projection.lowMin)}&ndash;{formatTime(projection.highMin)}.
       </p>
 
       {/* Projection grid */}
@@ -223,13 +228,21 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
         </summary>
         <div className="mt-2 rounded-lg bg-(--bg-inset) p-3">
           <p className="text-xs leading-relaxed text-(--text-muted)">
-            De geschatte finishtijd is berekend op basis van het gemiddelde tempo van
-            je laatste {recentLongRunCount} lange duurlopen ({formatPace(avgLongRunPace)}/km),
-            vermenigvuldigd met {RACE_KM} km, plus ~{AID_STATION_MIN} minuten
-            voor aid stations. Voor sub 10 uur heb je een moving pace nodig
-            van {formatPace(TARGET_PACE)}/km of sneller. Let op: sommige lange duurlopen
-            bevatten threshold-stukken die het gemiddelde tempo vertekenen &mdash; het
-            werkelijke duurtempo ligt iets hoger.
+            De schatting vertrekt vanuit je langste duurloop
+            ({projection.basisKm.toFixed(1)} km) en rekent die door naar {RACE_KM} km.
+            Daarbij hoort verval: niemand houdt over {RACE_KM} km het tempo van een
+            duurloop vast. Bovenop die tijd komt de {COURSE_ASCENT_M} m stijging van
+            het parcours, een toeslag voor ondergrond (het parcours is grotendeels
+            bosweg, trail en grind &mdash; jij traint vrijwel alleen op asfalt) en
+            ~{AID_STATION_MIN} minuten stilstand bij de aid stations. Voor sub 10 uur
+            heb je een moving pace nodig van {formatPace(TARGET_PACE)}/km of sneller.
+          </p>
+          <p className="mt-2 text-xs leading-relaxed text-(--text-muted)">
+            De bandbreedte {formatTime(projection.lowMin)}&ndash;{formatTime(projection.highMin)}{" "}
+            is eerlijker dan &eacute;&eacute;n getal: de mate van verval en de kosten van
+            de ondergrond zijn schattingen, geen metingen. Hitte zit er bewust niet in
+            &mdash; daar zegt je trainingsdata niets over. Lees de onderkant als
+            best-case en de bovenkant als een slechte dag.
           </p>
         </div>
       </details>

@@ -319,11 +319,42 @@ export function classifyReadiness(
 
 // Goal: sub 10 hours on Ultravasan 90.
 const TARGET_HOURS = 10;
-// ~35 min total standing time across the 9 aid stations.
-export const AID_STATION_MIN = 35;
 export const TARGET_TOTAL_MIN = TARGET_HOURS * 60;
+
+// Course facts (vasaloppet.se): 92 km with 867 m of ascent, made up of
+// ~60 km forest road, 18 km trail, 6 km gravel and 6 km asphalt.
+export const COURSE_ASCENT_M = 867;
+
+// Nine aid stations. The original 35 min (~4 min each) is optimistic for a
+// first 92 km; 45 min still assumes you keep moving with intent.
+export const AID_STATION_MIN = 45;
+
 // Required moving pace to hit the goal once aid-station time is removed.
 export const TARGET_PACE = (TARGET_TOTAL_MIN - AID_STATION_MIN) / RACE_DISTANCE_KM;
+
+// Riegel exponents. 1.06 models road racing; ultras fade harder than that.
+// The spread is what turns one false-precision number into an honest range.
+const RIEGEL = { low: 1.08, mid: 1.13, high: 1.18 } as const;
+
+// Surface cost. Only 18 of 92 km is genuine trail — 60 km is forest road, which
+// runs close to road pace, plus 6 km gravel and 6 km asphalt. So the penalty
+// against a pavement-trained runner is real but small. The direction is certain
+// and the magnitude is a judgement call, which is why it spans the range instead
+// of pretending to a single coefficient.
+const SURFACE_PENALTY = { low: 0.015, mid: 0.03, high: 0.05 } as const;
+
+// Climbing above what the basis run already contains, at ~45 s per 100 m of
+// ascent for a trained runner at ultra effort.
+const CLIMB_MIN_PER_100M = 0.75;
+
+// A basis run has to be a genuine long run, not a Sunday shuffle that
+// isLongRun happens to flag.
+const BASIS_MIN_KM = 25;
+// Wide enough that the peak block is still in scope on race day, so that
+// tapering doesn't make the projection drift upwards.
+const BASIS_WINDOW_WEEKS = 16;
+// Used only when no run in the window reports elevation.
+const FALLBACK_ASCENT_M_PER_KM = 4;
 
 export interface FinishProjection {
   hasData: boolean;
@@ -332,43 +363,124 @@ export interface FinishProjection {
   projectedTotalMin: number;
   diffMin: number;
   isOnTarget: boolean;
+  /** Optimistic end of the range: least fade, least surface cost. */
+  lowMin: number;
+  /** Pessimistic end of the range: most fade, most surface cost. */
+  highMin: number;
+  /** The run the projection is extrapolated from. */
+  basisKm: number;
+  basisDate: string;
 }
 
 /**
- * Project a finish time from recent long-run pace.
+ * One finish estimate for a given fade exponent and surface penalty.
  *
- * Uses the average pace of the last 5 long runs, applied across the full
- * race distance, plus a fixed aid-station allowance. This is a trend
- * indicator, not a race simulation.
+ * Riegel extrapolates the basis run to race distance; the surface and climb
+ * terms then price in the difference between where you train and where you
+ * race. Heat is deliberately absent — nothing in the activity data supports
+ * modelling it, so it stays a caveat rather than a fabricated number.
  */
-export function projectFinishTime(activities: ActivityData[]): FinishProjection {
+function estimate(
+  basisKm: number,
+  basisMovingMin: number,
+  trainingAscentPerKm: number,
+  exponent: number,
+  surfacePenalty: number
+): number {
+  const moving = basisMovingMin * Math.pow(RACE_DISTANCE_KM / basisKm, exponent);
+  const surface = moving * surfacePenalty;
+  const alreadyInBasis = trainingAscentPerKm * RACE_DISTANCE_KM;
+  const excessAscent = Math.max(0, COURSE_ASCENT_M - alreadyInBasis);
+  const climb = (excessAscent / 100) * CLIMB_MIN_PER_100M;
+  return moving + surface + climb + AID_STATION_MIN;
+}
+
+const NO_PROJECTION: FinishProjection = {
+  hasData: false,
+  runsUsed: 0,
+  avgPace: 0,
+  projectedTotalMin: 0,
+  diffMin: 0,
+  isOnTarget: false,
+  lowMin: 0,
+  highMin: 0,
+  basisKm: 0,
+  basisDate: "",
+};
+
+/**
+ * Project a finish time as it would have looked on a given date.
+ *
+ * Extrapolates the longest long run in the trailing window to race distance
+ * with a fade exponent, then adds the measured elevation difference, a surface
+ * allowance and aid-station time. Taking the longest run rather than a recent
+ * average means the estimate is driven by the most informative run available
+ * and doesn't decay during a taper.
+ *
+ * `asOf` makes the function reusable for historical timelines.
+ */
+export function projectFinishFrom(
+  activities: ActivityData[],
+  asOf: Date
+): FinishProjection {
   const longRuns = activities
-    .filter((a) => a.isLongRun)
+    .filter((a) => a.isLongRun && new Date(a.date) <= asOf)
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  if (longRuns.length === 0) return NO_PROJECTION;
+
+  const windowStart = new Date(asOf);
+  windowStart.setDate(windowStart.getDate() - BASIS_WINDOW_WEEKS * 7);
+  const inWindow = longRuns.filter((a) => new Date(a.date) >= windowStart);
+
+  const genuine = inWindow.filter((a) => a.distanceKm >= BASIS_MIN_KM);
+  const pool = genuine.length > 0 ? genuine : inWindow;
+  if (pool.length === 0) return NO_PROJECTION;
+
+  const basis = pool.reduce((a, b) => (b.distanceKm > a.distanceKm ? b : a));
+
+  const withElevation = inWindow.filter(
+    (a) => a.elevation !== null && a.distanceKm > 0
+  );
+  const trainingAscentPerKm =
+    withElevation.length > 0
+      ? withElevation.reduce(
+          (s, a) => s + (a.elevation as number) / a.distanceKm,
+          0
+        ) / withElevation.length
+      : FALLBACK_ASCENT_M_PER_KM;
+
+  const at = (exponent: number, penalty: number) =>
+    estimate(
+      basis.distanceKm,
+      basis.movingTimeMin,
+      trainingAscentPerKm,
+      exponent,
+      penalty
+    );
+
+  const projectedTotalMin = at(RIEGEL.mid, SURFACE_PENALTY.mid);
+
+  // The pace tile keeps its own meaning: recent long-run average, which is a
+  // training stat rather than the projection basis.
   const recent = longRuns.slice(-5);
-
-  if (recent.length === 0) {
-    return {
-      hasData: false,
-      runsUsed: 0,
-      avgPace: 0,
-      projectedTotalMin: 0,
-      diffMin: 0,
-      isOnTarget: false,
-    };
-  }
-
-  const avgPace =
-    recent.reduce((s, a) => s + a.paceMinKm, 0) / recent.length;
-  const projectedTotalMin = avgPace * RACE_DISTANCE_KM + AID_STATION_MIN;
-  const diffMin = projectedTotalMin - TARGET_TOTAL_MIN;
+  const avgPace = recent.reduce((s, a) => s + a.paceMinKm, 0) / recent.length;
 
   return {
     hasData: true,
     runsUsed: recent.length,
     avgPace,
     projectedTotalMin,
-    diffMin,
-    isOnTarget: diffMin <= 0,
+    diffMin: projectedTotalMin - TARGET_TOTAL_MIN,
+    isOnTarget: projectedTotalMin <= TARGET_TOTAL_MIN,
+    lowMin: at(RIEGEL.low, SURFACE_PENALTY.low),
+    highMin: at(RIEGEL.high, SURFACE_PENALTY.high),
+    basisKm: basis.distanceKm,
+    basisDate: basis.date,
   };
+}
+
+/** Project a finish time from the current training data. */
+export function projectFinishTime(activities: ActivityData[]): FinishProjection {
+  return projectFinishFrom(activities, new Date());
 }
