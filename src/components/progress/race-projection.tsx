@@ -115,6 +115,21 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
         {formatTime(projection.lowMin)}&ndash;{formatTime(projection.highMin)}.
       </p>
 
+      {projection.basisEffortPct !== null && (
+        <p className="mt-2 rounded-lg bg-(--bg-inset) px-3 py-2 text-[11px] leading-relaxed text-(--text-muted)">
+          <span className="font-medium text-(--text-secondary)">
+            Inspanning basis-run:
+          </span>{" "}
+          {projection.basisKm.toFixed(1)} km op {projection.basisHr} slagen (
+          {projection.basisEffortPct}% van HRmax).{" "}
+          {projection.basisEffortPct <= 78
+            ? "Rustig gelopen — de schatting gaat uit van dit tempo, terwijl je op de dag met meer marge kunt lopen. De prognose is dus eerder aan de voorzichtige kant."
+            : projection.basisEffortPct >= 85
+              ? "Stevige inspanning — dit tempo is niet 92 km vol te houden, dus lees de bovenkant van de bandbreedte als het realistische scenario."
+              : "Gecontroleerde inspanning, representatief voor een lange race."}
+        </p>
+      )}
+
       {/* Projection grid */}
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-lg bg-(--bg-inset) p-3">

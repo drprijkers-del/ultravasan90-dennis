@@ -8,6 +8,7 @@ import { useI18n, type Locale } from "@/lib/i18n";
 const NAV_KEYS = [
   { href: "/", key: "nav.home" },
   { href: "/progress", key: "nav.progress" },
+  { href: "/plan", key: "nav.plan" },
   { href: "/race", key: "nav.race" },
 ] as const;
 

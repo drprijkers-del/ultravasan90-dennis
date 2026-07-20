@@ -356,6 +356,12 @@ const BASIS_WINDOW_WEEKS = 16;
 // Used only when no run in the window reports elevation.
 const FALLBACK_ASCENT_M_PER_KM = 4;
 
+// Robust HR max from 2026 data (second-highest observed max, spikes dropped).
+// Used only to describe the effort of the basis run, never to adjust its pace —
+// a pace/HR regression on this athlete's runs has R2 ~ 0.05, so HR is context,
+// not a lever.
+export const HR_MAX = 194;
+
 export interface FinishProjection {
   hasData: boolean;
   runsUsed: number;
@@ -370,6 +376,10 @@ export interface FinishProjection {
   /** The run the projection is extrapolated from. */
   basisKm: number;
   basisDate: string;
+  /** Average HR of the basis run, or null if it wasn't recorded. */
+  basisHr: number | null;
+  /** Basis-run effort as a percentage of HR_MAX, or null. Context only. */
+  basisEffortPct: number | null;
 }
 
 /**
@@ -406,6 +416,8 @@ const NO_PROJECTION: FinishProjection = {
   highMin: 0,
   basisKm: 0,
   basisDate: "",
+  basisHr: null,
+  basisEffortPct: null,
 };
 
 /**
@@ -477,6 +489,10 @@ export function projectFinishFrom(
     highMin: at(RIEGEL.high, SURFACE_PENALTY.high),
     basisKm: basis.distanceKm,
     basisDate: basis.date,
+    basisHr: basis.heartrate,
+    basisEffortPct: basis.heartrate
+      ? Math.round((basis.heartrate / HR_MAX) * 100)
+      : null,
   };
 }
 
