@@ -10,6 +10,7 @@ import {
   timeOfDay,
   DEFAULT_AID_MIN,
   DEFAULT_PACE_MIN_KM,
+  DEFAULT_TEMP_C,
 } from "@/lib/race-plan";
 
 const DEFAULT_PACE_SEC = Math.round(DEFAULT_PACE_MIN_KM * 60);
@@ -20,10 +21,14 @@ export default function PlanPage() {
   const t = useT();
   const [paceSec, setPaceSec] = useState<number>(DEFAULT_PACE_SEC);
   const [aidMin, setAidMin] = useState<number>(DEFAULT_AID_MIN);
+  const [tempC, setTempC] = useState<number>(DEFAULT_TEMP_C);
 
-  const plan = computePlan(paceSec / 60, aidMin);
+  const plan = computePlan(paceSec / 60, aidMin, tempC);
   const subTen = plan.finishMin <= 600;
-  const isDefault = paceSec === DEFAULT_PACE_SEC && aidMin === DEFAULT_AID_MIN;
+  const isDefault =
+    paceSec === DEFAULT_PACE_SEC &&
+    aidMin === DEFAULT_AID_MIN &&
+    tempC === DEFAULT_TEMP_C;
 
   return (
     <div className="space-y-8">
@@ -51,6 +56,7 @@ export default function PlanPage() {
               onClick={() => {
                 setPaceSec(DEFAULT_PACE_SEC);
                 setAidMin(DEFAULT_AID_MIN);
+                setTempC(DEFAULT_TEMP_C);
               }}
               className="text-xs font-medium text-(--accent-orange) transition-opacity hover:opacity-80"
             >
@@ -59,7 +65,7 @@ export default function PlanPage() {
           )}
         </div>
 
-        <div className="mt-4 grid gap-5 sm:grid-cols-2">
+        <div className="mt-4 grid gap-5 sm:grid-cols-3">
           {/* Pace */}
           <div>
             <div className="flex items-baseline justify-between">
@@ -111,7 +117,37 @@ export default function PlanPage() {
               <span>{t("plan.muchRest")}</span>
             </div>
           </div>
+
+          {/* Temperature */}
+          <div>
+            <div className="flex items-baseline justify-between">
+              <label htmlFor="temp" className="text-xs text-(--text-muted)">
+                {t("plan.temp")}
+              </label>
+              <span className="font-mono text-sm font-bold text-(--text-primary)">
+                {tempC} °C
+              </span>
+            </div>
+            <input
+              id="temp"
+              type="range"
+              min={5}
+              max={30}
+              step={1}
+              value={tempC}
+              onChange={(e) => setTempC(Number(e.target.value))}
+              className="mt-2 w-full accent-(--accent-orange)"
+            />
+            <div className="mt-1 flex justify-between text-[10px] text-(--text-muted)">
+              <span>{t("plan.cool")}</span>
+              <span>{t("plan.warm")}</span>
+            </div>
+          </div>
         </div>
+
+        <p className="mt-4 text-[10px] leading-relaxed text-(--text-muted)">
+          {t("plan.heatHelp")}
+        </p>
       </div>
 
       {/* Finish headline */}
@@ -127,6 +163,14 @@ export default function PlanPage() {
           >
             {elapsedToClock(plan.finishMin)}
           </p>
+          {plan.heatMin >= 0.5 && (
+            <p className="mt-0.5 text-[10px] text-(--text-muted)">
+              {t("plan.heatNote", {
+                min: Math.round(plan.heatMin),
+                temp: plan.tempC,
+              })}
+            </p>
+          )}
         </div>
         <div className="text-right">
           <p className="text-[11px] font-medium uppercase tracking-wider text-(--text-muted)">

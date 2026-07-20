@@ -12,6 +12,19 @@ export const DEFAULT_AID_MIN = AID_STATION_MIN;
 export const DEFAULT_PACE_MIN_KM =
   (TARGET_TOTAL_MIN - DEFAULT_AID_MIN) / RACE_KM;
 
+// Heat cost. Below ~15C running is unaffected; above it pace fades. The rate is
+// a judgement coefficient (~0.4% slower per degree), not a measurement — this
+// athlete has no hot-weather data to fit — so it's a user-set scenario knob on
+// the plan, deliberately kept out of the data-driven projection. Default 15C
+// means no penalty, so the plan opens unchanged.
+export const HEAT_NEUTRAL_C = 15;
+export const DEFAULT_TEMP_C = HEAT_NEUTRAL_C;
+const HEAT_PCT_PER_C = 0.4;
+
+function heatFactor(tempC: number): number {
+  return 1 + (Math.max(0, tempC - HEAT_NEUTRAL_C) * HEAT_PCT_PER_C) / 100;
+}
+
 const START_HOUR = RACE_DATE.getHours();
 const START_MIN = RACE_DATE.getMinutes();
 
@@ -56,22 +69,31 @@ export interface PlanRow {
 
 export interface RacePlan {
   rows: PlanRow[];
+  /** Effective running pace after the heat adjustment, min/km. */
   paceMinKm: number;
+  /** Pace the user set, before heat, min/km. */
+  basePaceMinKm: number;
   aidTotalMin: number;
+  tempC: number;
+  /** Minutes added by heat vs a neutral-temperature run (0 at/below 15C). */
+  heatMin: number;
   finishMin: number;
 }
 
 /**
- * Build the checkpoint schedule for a chosen running pace and total standing
- * time. Moving time is even by distance at `paceMinKm`; `aidTotalMin` is spread
- * evenly across the stations reached so far. This is a target/deadline plan, not
- * the fade-aware projection on the progress page — even splits are what you pace
- * off, and the first half being hillier is a caveat, not a per-segment model.
+ * Build the checkpoint schedule for a chosen running pace, total standing time
+ * and expected temperature. Moving time is even by distance at the heat-adjusted
+ * pace; `aidTotalMin` is spread evenly across the stations reached so far. This
+ * is a target/deadline plan, not the fade-aware projection on the progress page
+ * — even splits are what you pace off, and the first half being hillier is a
+ * caveat, not a per-segment model.
  */
 export function computePlan(
-  paceMinKm: number,
-  aidTotalMin: number
+  basePaceMinKm: number,
+  aidTotalMin: number,
+  tempC: number = DEFAULT_TEMP_C
 ): RacePlan {
+  const paceMinKm = basePaceMinKm * heatFactor(tempC);
   const aidPerStation = aidTotalMin / AID_STATIONS;
 
   const rows: PlanRow[] = ULTRAVASAN_CHECKPOINTS.map((cp, idx) => {
@@ -96,7 +118,10 @@ export function computePlan(
   return {
     rows,
     paceMinKm,
+    basePaceMinKm,
     aidTotalMin,
+    tempC,
+    heatMin: (paceMinKm - basePaceMinKm) * RACE_KM,
     finishMin: RACE_KM * paceMinKm + aidTotalMin,
   };
 }
