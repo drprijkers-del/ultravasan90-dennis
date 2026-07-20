@@ -1,26 +1,20 @@
 "use client";
 
 import { formatPace } from "@/lib/race-config";
-import { AID_STATION_MIN } from "@/lib/race-readiness";
-import {
-  CHECKPOINT_PLAN,
-  MOVING_PACE,
-  elapsedToClock,
-  timeOfDay,
-} from "@/lib/race-plan";
+import { type RacePlan, elapsedToClock, timeOfDay } from "@/lib/race-plan";
 
-export function CheckpointPacing() {
+export function CheckpointPacing({ plan }: { plan: RacePlan }) {
   return (
     <div className="rounded-xl card-elevated bg-(--bg-card)">
       <div className="px-4 py-3 sm:px-5">
         <h3 className="text-sm font-medium text-(--text-muted)">
-          Raceplan &mdash; checkpoints voor sub 10 uur
+          Checkpointschema
         </h3>
         <p className="mt-1 text-xs leading-relaxed text-(--text-muted)">
-          Streeftijden bij een gelijkmatige {formatPace(MOVING_PACE)} min/km
-          lopend, plus ~{AID_STATION_MIN} min bij de posten. Start 05:00. De
-          eerste helft is heuvelachtiger &mdash; behandel die splits als plafond
-          en win tijd terug op de vlakke aanloop naar Mora.
+          Streeftijden bij een gelijkmatige {formatPace(plan.paceMinKm)} min/km
+          lopend, plus {Math.round(plan.aidTotalMin)} min stilstand totaal. Start
+          05:00. De eerste helft is heuvelachtiger &mdash; behandel die splits als
+          plafond en win tijd terug op de vlakke aanloop naar Mora.
         </p>
       </div>
 
@@ -39,7 +33,7 @@ export function CheckpointPacing() {
             </tr>
           </thead>
           <tbody className="divide-y divide-(--border-secondary)">
-            {CHECKPOINT_PLAN.map((r) => (
+            {plan.rows.map((r) => (
               <tr
                 key={r.name}
                 className={r.isFinish ? "bg-(--bg-inset) font-medium" : ""}

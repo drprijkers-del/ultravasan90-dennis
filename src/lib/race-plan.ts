@@ -4,15 +4,13 @@ import { AID_STATION_MIN, TARGET_TOTAL_MIN } from "./race-readiness";
 
 // Intermediate aid stations = every checkpoint except start and finish.
 const AID_STATIONS = ULTRAVASAN_CHECKPOINTS.length - 2;
-const RACE_KM = ULTRAVASAN_CHECKPOINTS[ULTRAVASAN_CHECKPOINTS.length - 1].km;
+export const RACE_KM = ULTRAVASAN_CHECKPOINTS[ULTRAVASAN_CHECKPOINTS.length - 1].km;
 
-// Sub-10 splits: distribute the moving budget evenly by distance and the aid
-// allowance evenly across the stations reached so far. Even-by-distance is a
-// first-order plan — the first half is hillier, so treat the early splits as
-// ceilings and bank a little time on the flatter run into Mora.
-const MOVING_BUDGET_MIN = TARGET_TOTAL_MIN - AID_STATION_MIN;
-export const MOVING_PACE = MOVING_BUDGET_MIN / RACE_KM;
-const AID_PER_STATION = AID_STATION_MIN / AID_STATIONS;
+// Defaults: the pace a sub-10 needs at the modelled aid time, so the plan opens
+// on the goal line and the user adjusts from there.
+export const DEFAULT_AID_MIN = AID_STATION_MIN;
+export const DEFAULT_PACE_MIN_KM =
+  (TARGET_TOTAL_MIN - DEFAULT_AID_MIN) / RACE_KM;
 
 const START_HOUR = RACE_DATE.getHours();
 const START_MIN = RACE_DATE.getMinutes();
@@ -52,19 +50,34 @@ export interface PlanRow {
   fuel: string;
 }
 
-// The plan is fully determined by the fixed course and the sub-10 target, so
-// build it once at module scope.
-export const CHECKPOINT_PLAN: PlanRow[] = ULTRAVASAN_CHECKPOINTS.map(
-  (cp, idx) => {
+export interface RacePlan {
+  rows: PlanRow[];
+  paceMinKm: number;
+  aidTotalMin: number;
+  finishMin: number;
+}
+
+/**
+ * Build the checkpoint schedule for a chosen running pace and total standing
+ * time. Moving time is even by distance at `paceMinKm`; `aidTotalMin` is spread
+ * evenly across the stations reached so far. This is a target/deadline plan, not
+ * the fade-aware projection on the progress page — even splits are what you pace
+ * off, and the first half being hillier is a caveat, not a per-segment model.
+ */
+export function computePlan(
+  paceMinKm: number,
+  aidTotalMin: number
+): RacePlan {
+  const aidPerStation = aidTotalMin / AID_STATIONS;
+
+  const rows: PlanRow[] = ULTRAVASAN_CHECKPOINTS.map((cp, idx) => {
     const isFinish = idx === ULTRAVASAN_CHECKPOINTS.length - 1;
     const stationsReached = Math.min(idx, AID_STATIONS);
-    const arrival = cp.km * MOVING_PACE + stationsReached * AID_PER_STATION;
+    const arrival = cp.km * paceMinKm + stationsReached * aidPerStation;
     const prevKm = idx === 0 ? 0 : ULTRAVASAN_CHECKPOINTS[idx - 1].km;
+    const prevStations = Math.min(Math.max(idx - 1, 0), AID_STATIONS);
     const prevArrival =
-      idx === 0
-        ? 0
-        : prevKm * MOVING_PACE +
-          Math.min(idx - 1, AID_STATIONS) * AID_PER_STATION;
+      idx === 0 ? 0 : prevKm * paceMinKm + prevStations * aidPerStation;
     const segKm = cp.km - prevKm;
     return {
       name: cp.name,
@@ -74,5 +87,12 @@ export const CHECKPOINT_PLAN: PlanRow[] = ULTRAVASAN_CHECKPOINTS.map(
       isFinish,
       fuel: fuelNote(idx, isFinish),
     };
-  }
-);
+  });
+
+  return {
+    rows,
+    paceMinKm,
+    aidTotalMin,
+    finishMin: RACE_KM * paceMinKm + aidTotalMin,
+  };
+}
