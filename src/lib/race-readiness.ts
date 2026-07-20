@@ -14,9 +14,15 @@ import { RACE_DISTANCE_KM } from "./race-config";
 
 export type ReadinessStatus = "green" | "yellow" | "red";
 
+/** A reason as an i18n key + params, so the UI translates it. */
+export interface ReadinessReason {
+  key: string;
+  params?: Record<string, string | number>;
+}
+
 export interface ReadinessResult {
   status: ReadinessStatus;
-  reasons: string[];
+  reasons: ReadinessReason[];
 }
 
 export interface PaceFadeEntry {
@@ -230,7 +236,7 @@ export function classifyReadiness(
   weekly: WeeklyData[],
   activities: ActivityData[]
 ): ReadinessResult {
-  const reasons: string[] = [];
+  const reasons: ReadinessReason[] = [];
   const weeks = weekly.length;
   const trend = volumeTrend(weekly);
   const durability = longRunDurability(activities, 6);
@@ -263,53 +269,60 @@ export function classifyReadiness(
 
   // Red conditions
   if (weeks < 6) {
-    reasons.push(`Nog maar ${weeks} weken data (minimaal 6 nodig)`);
+    reasons.push({ key: "fewWeeksRed", params: { weeks } });
     return { status: "red", reasons };
   }
 
   if (!hasRun3h && reliability.totalLongRuns < 3) {
-    reasons.push("Te weinig lange duurlopen voor een betrouwbare inschatting");
+    reasons.push({ key: "tooFewLongRuns" });
     return { status: "red", reasons };
   }
 
   if (hasLargeFluctuations && !trendStableOrUp) {
-    reasons.push("Grote schommelingen in weekvolume en dalende trend");
+    reasons.push({ key: "bigFluctDownTrend" });
     return { status: "red", reasons };
   }
 
   // Green conditions
   if (hasEnoughWeeks && trendStableOrUp && hasLongEnoughRun && paceIsStable) {
-    reasons.push("Consistent volume met stabiele of stijgende trend");
+    reasons.push({ key: "consistentVolume" });
     if (durability.maxDurationMin >= THREE_HALF_HOUR_MIN) {
-      reasons.push(
-        `Langste duurloop: ${Math.round(durability.maxDurationMin)} min (${durability.maxDistanceKm.toFixed(1)} km)`
-      );
+      reasons.push({
+        key: "longestRun",
+        params: {
+          min: Math.round(durability.maxDurationMin),
+          km: durability.maxDistanceKm.toFixed(1),
+        },
+      });
     }
-    reasons.push(
-      `Tempo-variatie: ${stability.coefficientOfVariation}% (stabiel)`
-    );
+    reasons.push({
+      key: "paceStable",
+      params: { cv: stability.coefficientOfVariation ?? 0 },
+    });
     return { status: "green", reasons };
   }
 
   // Yellow: everything else
   if (!hasEnoughWeeks) {
-    reasons.push(`${weeks} weken data — meer data geeft betrouwbaarder beeld`);
+    reasons.push({ key: "moreDataBetter", params: { weeks } });
   }
   if (!hasLongEnoughRun) {
-    reasons.push(
-      `Langste run: ${Math.round(durability.maxDurationMin)} min — ≥3.5 uur is wenselijk`
-    );
+    reasons.push({
+      key: "longRunShort",
+      params: { min: Math.round(durability.maxDurationMin) },
+    });
   }
   if (stability.coefficientOfVariation !== null && !paceIsStable) {
-    reasons.push(
-      `Tempo-variatie: ${stability.coefficientOfVariation}% — focus op gelijkmatiger tempo`
-    );
+    reasons.push({
+      key: "paceUnstable",
+      params: { cv: stability.coefficientOfVariation },
+    });
   }
   if (hasLargeFluctuations) {
-    reasons.push("Week-tot-week volume schommelt sterk");
+    reasons.push({ key: "volumeFluctuates" });
   }
   if (trend !== null && !trendStableOrUp) {
-    reasons.push("Volume trend is dalend");
+    reasons.push({ key: "volumeDown" });
   }
 
   return { status: "yellow", reasons };

@@ -85,7 +85,7 @@ export function VerdictCard({ weekly, activities }: Props) {
                 className="flex items-start gap-2 text-sm text-(--text-secondary)"
               >
                 <span className="mt-0.5 text-(--text-muted)">&bull;</span>
-                {reason}
+                {t(`home.verdict.reasons.${reason.key}`, reason.params)}
               </li>
             ))}
           </ul>

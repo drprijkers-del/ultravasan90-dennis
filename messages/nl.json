@@ -32,7 +32,20 @@
       "aboveTarget": "min boven sub-10u",
       "basedOn": "o.b.v. laatste duurlopen",
       "whatNow": "Wat kan ik doen",
-      "fullAnalysis": "Volledige analyse"
+      "fullAnalysis": "Volledige analyse",
+      "reasons": {
+        "fewWeeksRed": "Nog maar {weeks} weken data (minimaal 6 nodig)",
+        "tooFewLongRuns": "Te weinig lange duurlopen voor een betrouwbare inschatting",
+        "bigFluctDownTrend": "Grote schommelingen in weekvolume en dalende trend",
+        "consistentVolume": "Consistent volume met stabiele of stijgende trend",
+        "longestRun": "Langste duurloop: {min} min ({km} km)",
+        "paceStable": "Tempo-variatie: {cv}% (stabiel)",
+        "moreDataBetter": "{weeks} weken data — meer data geeft betrouwbaarder beeld",
+        "longRunShort": "Langste run: {min} min — ≥3.5 uur is wenselijk",
+        "paceUnstable": "Tempo-variatie: {cv}% — focus op gelijkmatiger tempo",
+        "volumeFluctuates": "Week-tot-week volume schommelt sterk",
+        "volumeDown": "Volume trend is dalend"
+      }
     }
   },
   "progress": {
@@ -153,7 +166,7 @@
     "underSubTen": "{t} onder sub-10",
     "overSubTen": "{t} boven sub-10",
     "schedule": "Checkpointschema",
-    "scheduleIntro": "Streeftijden bij een gelijkmatige {pace} min/km lopend, plus {aid} min stilstand totaal. Start 05:00. De eerste helft is heuvelachtiger — behandel die splits als plafond en win tijd terug op de vlakke aanloop naar Mora.",
+    "scheduleIntro": "Streeftijden op basis van gemiddeld {pace} min/km, terrein-gewogen: langzamer over de glooiende eerste helft, sneller op de afdaling naar Mora. Plus {aid} min stilstand totaal. Start 05:00.",
     "colCheckpoint": "Post",
     "colKm": "km",
     "colClock": "Klok",

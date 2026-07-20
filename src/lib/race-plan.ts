@@ -1,6 +1,7 @@
 import { ULTRAVASAN_CHECKPOINTS } from "./mock-data";
 import { RACE_DATE } from "./race-config";
 import { AID_STATION_MIN, TARGET_TOTAL_MIN } from "./race-readiness";
+import { elevationAtKm } from "./course-elevation";
 
 // Intermediate aid stations = every checkpoint except start and finish.
 const AID_STATIONS = ULTRAVASAN_CHECKPOINTS.length - 2;
@@ -23,6 +24,43 @@ const HEAT_PCT_PER_C = 0.4;
 
 function heatFactor(tempC: number): number {
   return 1 + (Math.max(0, tempC - HEAT_NEUTRAL_C) * HEAT_PCT_PER_C) / 100;
+}
+
+// Terrain weighting. Splits are tilted by how much a segment climbs and drops,
+// so the schedule expects you slower up the rolling first half and faster on the
+// long descent into Mora — total time unchanged. Costs are in km-equivalents per
+// metre: ~100 m of climb ≈ +0.8 km of effort, ~100 m of descent ≈ -0.3 km (a
+// descent gives back far less than a climb takes). Coarse profile, so this is a
+// realistic tilt, not a to-the-second split.
+const CLIMB_KM_PER_M = 0.8 / 100;
+const DESCENT_KM_PER_M = 0.3 / 100;
+
+/** Ascent and descent (m) over a segment, sampled from the elevation profile. */
+function segmentRelief(fromKm: number, toKm: number): { gain: number; loss: number } {
+  let gain = 0;
+  let loss = 0;
+  let prev = elevationAtKm(fromKm);
+  // Sample at ~1 km so rolling terrain isn't cancelled by checkpoint-net change.
+  const steps = Math.max(1, Math.round(toKm - fromKm));
+  for (let s = 1; s <= steps; s++) {
+    const km = fromKm + ((toKm - fromKm) * s) / steps;
+    const e = elevationAtKm(km);
+    const d = e - prev;
+    if (d > 0) gain += d;
+    else loss += -d;
+    prev = e;
+  }
+  return { gain, loss };
+}
+
+/**
+ * Effort-weighted length of a segment in km-equivalents: flat distance plus a
+ * climb penalty minus a smaller descent credit, floored so a steep drop never
+ * makes a segment "negative distance".
+ */
+function effortKm(distKm: number, gain: number, loss: number): number {
+  const adjusted = distKm + gain * CLIMB_KM_PER_M - loss * DESCENT_KM_PER_M;
+  return Math.max(distKm * 0.5, adjusted);
 }
 
 const START_HOUR = RACE_DATE.getHours();
@@ -96,19 +134,31 @@ export function computePlan(
   const paceMinKm = basePaceMinKm * heatFactor(tempC);
   const aidPerStation = aidTotalMin / AID_STATIONS;
 
+  // Total moving budget stays fixed; terrain only redistributes it across
+  // segments, so the finish time is unchanged by the weighting.
+  const movingBudget = RACE_KM * paceMinKm;
+  const segments = ULTRAVASAN_CHECKPOINTS.slice(1).map((cp, i) => {
+    const prevKm = ULTRAVASAN_CHECKPOINTS[i].km;
+    const dist = cp.km - prevKm;
+    const { gain, loss } = segmentRelief(prevKm, cp.km);
+    return { dist, effort: effortKm(dist, gain, loss) };
+  });
+  const totalEffort = segments.reduce((s, x) => s + x.effort, 0);
+
+  let cumMoving = 0;
   const rows: PlanRow[] = ULTRAVASAN_CHECKPOINTS.map((cp, idx) => {
     const isFinish = idx === ULTRAVASAN_CHECKPOINTS.length - 1;
     const stationsReached = Math.min(idx, AID_STATIONS);
-    const arrival = cp.km * paceMinKm + stationsReached * aidPerStation;
-    const prevKm = idx === 0 ? 0 : ULTRAVASAN_CHECKPOINTS[idx - 1].km;
-    const prevStations = Math.min(Math.max(idx - 1, 0), AID_STATIONS);
-    const prevArrival =
-      idx === 0 ? 0 : prevKm * paceMinKm + prevStations * aidPerStation;
-    const segKm = cp.km - prevKm;
+    if (idx > 0) {
+      cumMoving += (segments[idx - 1].effort / totalEffort) * movingBudget;
+    }
+    const arrival = cumMoving + stationsReached * aidPerStation;
+    const seg = idx > 0 ? segments[idx - 1] : null;
+    const segMoving = seg ? (seg.effort / totalEffort) * movingBudget : 0;
     return {
       name: cp.name,
       km: cp.km,
-      segPace: segKm > 0 ? (arrival - prevArrival) / segKm : 0,
+      segPace: seg && seg.dist > 0 ? segMoving / seg.dist : 0,
       arrival,
       isFinish,
       fuel: fuelNote(idx, isFinish),
@@ -122,6 +172,6 @@ export function computePlan(
     aidTotalMin,
     tempC,
     heatMin: (paceMinKm - basePaceMinKm) * RACE_KM,
-    finishMin: RACE_KM * paceMinKm + aidTotalMin,
+    finishMin: movingBudget + aidTotalMin,
   };
 }

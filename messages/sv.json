@@ -32,7 +32,20 @@
       "aboveTarget": "min över 10h-målet",
       "basedOn": "baserat på senaste distanspassen",
       "whatNow": "Vad kan jag göra",
-      "fullAnalysis": "Fullständig analys"
+      "fullAnalysis": "Fullständig analys",
+      "reasons": {
+        "fewWeeksRed": "Bara {weeks} veckor data (minst 6 krävs)",
+        "tooFewLongRuns": "För få långa distanspass för en tillförlitlig uppskattning",
+        "bigFluctDownTrend": "Stora svängningar i veckovolym och fallande trend",
+        "consistentVolume": "Jämn volym med stabil eller stigande trend",
+        "longestRun": "Längsta distanspass: {min} min ({km} km)",
+        "paceStable": "Tempovariation: {cv}% (stabilt)",
+        "moreDataBetter": "{weeks} veckor data — mer data ger en säkrare bild",
+        "longRunShort": "Längsta pass: {min} min — ≥3,5 timmar är önskvärt",
+        "paceUnstable": "Tempovariation: {cv}% — fokusera på jämnare tempo",
+        "volumeFluctuates": "Veckovolymen svänger kraftigt",
+        "volumeDown": "Volymtrenden är fallande"
+      }
     }
   },
   "progress": {
@@ -153,7 +166,7 @@
     "underSubTen": "{t} under 10-målet",
     "overSubTen": "{t} över 10-målet",
     "schedule": "Kontrollschema",
-    "scheduleIntro": "Passertider vid ett jämnt tempo på {pace} min/km löpande, plus {aid} min stillastående totalt. Start 05:00. Första halvan är mer kuperad — behandla de splitarna som tak och vinn tillbaka tid på den flacka infarten mot Mora.",
+    "scheduleIntro": "Passertider baserat på snitt {pace} min/km, terrängviktat: långsammare över den kuperade första halvan, snabbare på nedförsbacken mot Mora. Plus {aid} min stillastående totalt. Start 05:00.",
     "colCheckpoint": "Kontroll",
     "colKm": "km",
     "colClock": "Klocka",
