@@ -52,8 +52,10 @@ function computeProjectionTimeline(longRuns: ActivityData[]) {
 }
 
 function formatTime(min: number) {
-  const h = Math.floor(min / 60);
-  const m = Math.round(min % 60);
+  // Round to whole minutes first, otherwise 59.7 -> "10:60" instead of "11:00".
+  const total = Math.round(min);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
   return `${h}:${m.toString().padStart(2, "0")}`;
 }
 

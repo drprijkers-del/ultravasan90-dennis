@@ -59,8 +59,10 @@ export function formatDuration(minutes: number): string {
 
 // Clock format for finish times, e.g. 585 -> "9:45"
 export function formatClock(minutes: number): string {
-  const h = Math.floor(minutes / 60);
-  const m = Math.round(minutes % 60);
+  // Round to whole minutes first, otherwise 59.7 -> "10:60" instead of "11:00".
+  const total = Math.round(minutes);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
   return `${h}:${m.toString().padStart(2, "0")}`;
 }
 
