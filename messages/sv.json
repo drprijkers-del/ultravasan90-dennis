@@ -17,6 +17,8 @@
     },
     "moreDetails": "Se framsteg",
     "raceDay": "Tävlingsdag",
+    "racePlan": "Tävlingsplan",
+    "racePlanDesc": "Checkpointschema och nutrition för under 10 timmar",
     "verdict": {
       "title": "Ligger jag i fas?",
       "onTrack": "I fas för under 10 timmar",

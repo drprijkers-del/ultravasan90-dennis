@@ -9,7 +9,6 @@ const NAV_KEYS = [
   { href: "/", key: "nav.home" },
   { href: "/progress", key: "nav.progress" },
   { href: "/plan", key: "nav.plan" },
-  { href: "/race", key: "nav.race" },
 ] as const;
 
 export function Nav() {

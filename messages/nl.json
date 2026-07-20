@@ -17,6 +17,8 @@
     },
     "moreDetails": "Bekijk voortgang",
     "raceDay": "Race Day",
+    "racePlan": "Raceplan",
+    "racePlanDesc": "Checkpointschema en voeding voor sub 10 uur",
     "verdict": {
       "title": "Zit ik op koers?",
       "onTrack": "Op koers voor sub-10 uur",
