@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "check-i18n": "node scripts/check-i18n.mjs",
+    "check-hardcoded": "node scripts/check-hardcoded-text.mjs",
     "build": "npm run check-i18n && prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
