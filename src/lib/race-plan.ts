@@ -32,11 +32,14 @@ export function timeOfDay(min: number): string {
 // Carbs come in from the first station and keep coming — the point is not to
 // wait for the legs to complain. Stations sit ~11 km apart, further than one
 // gel covers, so the plan carries gels for the gaps and refills/eats on arrival.
-function fuelNote(idx: number, isFinish: boolean): string {
-  if (isFinish) return "Binnen — klaar";
-  if (idx === 0) return "Nog niets nodig";
-  if (idx === 1) return "Eerste gel + drinken";
-  return "Vullen, eten + gel mee voor onderweg";
+// Returns an i18n key suffix; the component resolves it under `plan.*`.
+export type FuelKey = "fuelNone" | "fuelFirst" | "fuelStation" | "fuelFinish";
+
+function fuelNote(idx: number, isFinish: boolean): FuelKey {
+  if (isFinish) return "fuelFinish";
+  if (idx === 0) return "fuelNone";
+  if (idx === 1) return "fuelFirst";
+  return "fuelStation";
 }
 
 export interface PlanRow {
@@ -47,7 +50,8 @@ export interface PlanRow {
   /** Cumulative elapsed minutes from the start. */
   arrival: number;
   isFinish: boolean;
-  fuel: string;
+  /** i18n key suffix resolved under `plan.*`. */
+  fuel: FuelKey;
 }
 
 export interface RacePlan {

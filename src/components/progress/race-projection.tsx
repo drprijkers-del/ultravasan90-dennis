@@ -21,6 +21,7 @@ import {
   TARGET_TOTAL_MIN,
 } from "@/lib/race-readiness";
 import { tooltipStyle, gridStroke, colors } from "@/lib/theme";
+import { useT } from "@/lib/i18n";
 import type { ActivityData } from "@/lib/types";
 
 interface Props {
@@ -60,6 +61,7 @@ function formatTime(min: number) {
 }
 
 export function RaceProjection({ longRuns, allActivities }: Props) {
+  const t = useT();
   const [showChart, setShowChart] = useState(false);
 
   // Ensure chronological order (oldest first)
@@ -105,28 +107,34 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
   return (
     <div className="card-elevated rounded-xl bg-(--bg-card) p-4 sm:p-5">
       <h3 className="text-sm font-semibold text-(--accent-orange)">
-        Race Prognose &mdash; Sub 10 uur
+        {t("progress.projection.title")}
       </h3>
       <p className="mt-1 text-xs leading-relaxed text-(--text-muted)">
-        Op basis van je langste duurloop ({projection.basisKm.toFixed(1)} km),
-        doorgerekend naar {RACE_KM} km inclusief verval over die afstand.
-        Uitgangspunt: {COURSE_ASCENT_M} m stijging, grotendeels bosweg en trail,
-        ~{AID_STATION_MIN} min stilstand (self-supported, doorlopend). Realistische bandbreedte:{" "}
-        {formatTime(projection.lowMin)}&ndash;{formatTime(projection.highMin)}.
+        {t("progress.projection.intro", {
+          basis: projection.basisKm.toFixed(1),
+          race: RACE_KM,
+          ascent: COURSE_ASCENT_M,
+          aid: AID_STATION_MIN,
+          low: formatTime(projection.lowMin),
+          high: formatTime(projection.highMin),
+        })}
       </p>
 
       {projection.basisEffortPct !== null && (
         <p className="mt-2 rounded-lg bg-(--bg-inset) px-3 py-2 text-[11px] leading-relaxed text-(--text-muted)">
           <span className="font-medium text-(--text-secondary)">
-            Inspanning basis-run:
+            {t("progress.projection.effortLabel")}
           </span>{" "}
-          {projection.basisKm.toFixed(1)} km op {projection.basisHr} slagen (
-          {projection.basisEffortPct}% van HRmax).{" "}
+          {t("progress.projection.effortStat", {
+            basis: projection.basisKm.toFixed(1),
+            hr: projection.basisHr ?? 0,
+            pct: projection.basisEffortPct,
+          })}{" "}
           {projection.basisEffortPct <= 78
-            ? "Rustig gelopen — de schatting gaat uit van dit tempo, terwijl je op de dag met meer marge kunt lopen. De prognose is dus eerder aan de voorzichtige kant."
+            ? t("progress.projection.effortEasy")
             : projection.basisEffortPct >= 85
-              ? "Stevige inspanning — dit tempo is niet 92 km vol te houden, dus lees de bovenkant van de bandbreedte als het realistische scenario."
-              : "Gecontroleerde inspanning, representatief voor een lange race."}
+              ? t("progress.projection.effortHard")
+              : t("progress.projection.effortModerate")}
         </p>
       )}
 
@@ -134,51 +142,51 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-lg bg-(--bg-inset) p-3">
           <p className="text-[10px] font-medium uppercase tracking-wider text-(--text-muted)">
-            Geschatte finishtijd
+            {t("progress.projection.estFinish")}
           </p>
           <p className={`mt-1 text-xl font-bold ${isOnTarget ? "text-(--accent)" : "text-(--accent-orange)"}`}>
             {projectedHours}:{projectedMins.toString().padStart(2, "0")}
           </p>
           <p className="mt-0.5 text-[10px] text-(--text-muted)">
             {isOnTarget
-              ? `${Math.abs(Math.round(diffMin))} min onder doel`
-              : `${Math.round(diffMin)} min boven doel`}
+              ? `${Math.abs(Math.round(diffMin))} ${t("progress.projection.belowTarget")}`
+              : `${Math.round(diffMin)} ${t("progress.projection.aboveTarget")}`}
           </p>
         </div>
 
         <div className="rounded-lg bg-(--bg-inset) p-3">
           <p className="text-[10px] font-medium uppercase tracking-wider text-(--text-muted)">
-            Gem. duurloop tempo
+            {t("progress.projection.avgPace")}
           </p>
           <p className="mt-1 text-xl font-bold text-(--text-primary)">
             {formatPace(avgLongRunPace)}
           </p>
           <p className="mt-0.5 text-[10px] text-(--text-muted)">
-            doel: {formatPace(TARGET_PACE)}/km
+            {t("progress.projection.paceGoal", { pace: formatPace(TARGET_PACE) })}
           </p>
         </div>
 
         <div className="rounded-lg bg-(--bg-inset) p-3">
           <p className="text-[10px] font-medium uppercase tracking-wider text-(--text-muted)">
-            Langste duurloop
+            {t("progress.projection.longestRun")}
           </p>
           <p className="mt-1 text-xl font-bold text-(--text-primary)">
             {longestRun.toFixed(0)} km
           </p>
           <p className="mt-0.5 text-[10px] text-(--text-muted)">
-            {longestPct}% van raceafstand
+            {t("progress.projection.pctOfRace", { pct: longestPct })}
           </p>
         </div>
 
         <div className="rounded-lg bg-(--bg-inset) p-3">
           <p className="text-[10px] font-medium uppercase tracking-wider text-(--text-muted)">
-            Volume (4w gem.)
+            {t("progress.projection.volume4w")}
           </p>
           <p className="mt-1 text-xl font-bold text-(--text-primary)">
-            {weeklyKm4w.toFixed(0)} km/w
+            {weeklyKm4w.toFixed(0)} {t("progress.projection.perWeek")}
           </p>
           <p className="mt-0.5 text-[10px] text-(--text-muted)">
-            doel: 45&ndash;65 km/w
+            {t("progress.projection.volumeBand")}
           </p>
         </div>
       </div>
@@ -199,12 +207,12 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-            Prognose-ontwikkeling
+            {t("progress.projection.projectionTrend")}
           </button>
           {showChart && (
             <>
           <p className="mt-2 mb-3 text-[10px] text-(--text-muted)">
-            Hoe de geschatte finishtijd zich ontwikkelt naarmate je meer duurlopen doet. Lijn onder de groene streep = sub 10 uur.
+            {t("progress.projection.projectionHelp")}
           </p>
           <ResponsiveContainer width="100%" height={180}>
             <LineChart data={timeline}>
@@ -225,7 +233,7 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
               <Tooltip
                 contentStyle={tooltipStyle}
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                formatter={(value: any) => [formatTime(value as number), "Prognose"]}
+                formatter={(value: any) => [formatTime(value as number), t("progress.projection.tooltip")]}
               />
               <ReferenceLine
                 y={TARGET_TOTAL_MIN}
@@ -233,7 +241,7 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
                 strokeWidth={2}
                 strokeDasharray="6 3"
                 label={{
-                  value: "Sub 10h",
+                  value: t("progress.projection.subTen"),
                   position: "right",
                   fill: colors.emerald.primary,
                   fontSize: 10,
@@ -260,27 +268,23 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
           <svg className="h-3.5 w-3.5 transition-transform [[open]>&]:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
-          Hoe lees je dit?
+          {t("progress.projection.howToRead")}
         </summary>
         <div className="mt-2 rounded-lg bg-(--bg-inset) p-3">
           <p className="text-xs leading-relaxed text-(--text-muted)">
-            De schatting vertrekt vanuit je langste duurloop
-            ({projection.basisKm.toFixed(1)} km) en rekent die door naar {RACE_KM} km.
-            Daarbij hoort verval: niemand houdt over {RACE_KM} km het tempo van een
-            duurloop vast. Bovenop die tijd komt de {COURSE_ASCENT_M} m stijging van
-            het parcours, een toeslag voor ondergrond (het parcours is grotendeels
-            bosweg, trail en grind &mdash; jij traint vrijwel alleen op asfalt) en
-            ~{AID_STATION_MIN} minuten stilstand &mdash; je loopt self-supported, neemt
-            eten en drinken mee, hebt bevoorrading op de helft en blijft in beweging,
-            dus geen 45 min bij posten. Voor sub 10 uur heb je een moving pace nodig
-            van {formatPace(TARGET_PACE)}/km of sneller.
+            {t("progress.projection.explain1", {
+              basis: projection.basisKm.toFixed(1),
+              race: RACE_KM,
+              ascent: COURSE_ASCENT_M,
+              aid: AID_STATION_MIN,
+              pace: formatPace(TARGET_PACE),
+            })}
           </p>
           <p className="mt-2 text-xs leading-relaxed text-(--text-muted)">
-            De bandbreedte {formatTime(projection.lowMin)}&ndash;{formatTime(projection.highMin)}{" "}
-            is eerlijker dan &eacute;&eacute;n getal: de mate van verval en de kosten van
-            de ondergrond zijn schattingen, geen metingen. Hitte zit er bewust niet in
-            &mdash; daar zegt je trainingsdata niets over. Lees de onderkant als
-            best-case en de bovenkant als een slechte dag.
+            {t("progress.projection.explain2", {
+              low: formatTime(projection.lowMin),
+              high: formatTime(projection.highMin),
+            })}
           </p>
         </div>
       </details>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckpointPacing } from "@/components/progress/checkpoint-pacing";
 import { formatPace } from "@/lib/race-config";
+import { useT } from "@/lib/i18n";
 import {
   computePlan,
   elapsedToClock,
@@ -16,6 +17,7 @@ const PACE_MIN_SEC = 315; // 5:15/km
 const PACE_MAX_SEC = 435; // 7:15/km
 
 export default function PlanPage() {
+  const t = useT();
   const [paceSec, setPaceSec] = useState<number>(DEFAULT_PACE_SEC);
   const [aidMin, setAidMin] = useState<number>(DEFAULT_AID_MIN);
 
@@ -27,26 +29,23 @@ export default function PlanPage() {
     <div className="space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-(--text-primary)">Raceplan</h1>
+          <h1 className="text-2xl font-bold text-(--text-primary)">{t("plan.title")}</h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-(--text-secondary)">
-            Mijn strategie voor Ultravasan 90: streeftijden per checkpoint, met
-            een voedingsschema. Stel je tempo en stilstand in &mdash; als mijn
-            coach een snellere pace aangeeft, voer ik die hier in en draai ik een
-            nieuwe PDF.
+            {t("plan.intro")}
           </p>
         </div>
         <button
           onClick={() => window.print()}
           className="shrink-0 rounded-md border border-(--border-primary) px-3 py-1.5 text-xs font-medium text-(--text-muted) transition-colors hover:text-(--text-secondary) print:hidden"
         >
-          Print / PDF
+          {t("plan.print")}
         </button>
       </div>
 
       {/* Controls */}
       <div className="rounded-xl card-elevated bg-(--bg-card) p-4 sm:p-5 print:hidden">
         <div className="flex items-baseline justify-between">
-          <h3 className="text-sm font-medium text-(--text-muted)">Instellingen</h3>
+          <h3 className="text-sm font-medium text-(--text-muted)">{t("plan.settings")}</h3>
           {!isDefault && (
             <button
               onClick={() => {
@@ -55,7 +54,7 @@ export default function PlanPage() {
               }}
               className="text-xs font-medium text-(--accent-orange) transition-opacity hover:opacity-80"
             >
-              Terug naar sub-10
+              {t("plan.resetSubTen")}
             </button>
           )}
         </div>
@@ -65,7 +64,7 @@ export default function PlanPage() {
           <div>
             <div className="flex items-baseline justify-between">
               <label htmlFor="pace" className="text-xs text-(--text-muted)">
-                Looptempo
+                {t("plan.pace")}
               </label>
               <span className="font-mono text-sm font-bold text-(--text-primary)">
                 {formatPace(paceSec / 60)}/km
@@ -82,8 +81,8 @@ export default function PlanPage() {
               className="mt-2 w-full accent-(--accent-orange)"
             />
             <div className="mt-1 flex justify-between text-[10px] text-(--text-muted)">
-              <span>sneller</span>
-              <span>langzamer</span>
+              <span>{t("plan.faster")}</span>
+              <span>{t("plan.slower")}</span>
             </div>
           </div>
 
@@ -91,7 +90,7 @@ export default function PlanPage() {
           <div>
             <div className="flex items-baseline justify-between">
               <label htmlFor="aid" className="text-xs text-(--text-muted)">
-                Stilstand totaal
+                {t("plan.standTotal")}
               </label>
               <span className="font-mono text-sm font-bold text-(--text-primary)">
                 {aidMin} min
@@ -108,8 +107,8 @@ export default function PlanPage() {
               className="mt-2 w-full accent-(--accent-orange)"
             />
             <div className="mt-1 flex justify-between text-[10px] text-(--text-muted)">
-              <span>doorlopen</span>
-              <span>veel pauze</span>
+              <span>{t("plan.keepMoving")}</span>
+              <span>{t("plan.muchRest")}</span>
             </div>
           </div>
         </div>
@@ -119,7 +118,7 @@ export default function PlanPage() {
       <div className="flex items-center justify-between rounded-xl card-elevated bg-(--bg-card) px-5 py-4">
         <div>
           <p className="text-[11px] font-medium uppercase tracking-wider text-(--text-muted)">
-            Streeftijd finish
+            {t("plan.targetFinish")}
           </p>
           <p
             className={`mt-1 text-3xl font-bold ${
@@ -131,7 +130,7 @@ export default function PlanPage() {
         </div>
         <div className="text-right">
           <p className="text-[11px] font-medium uppercase tracking-wider text-(--text-muted)">
-            In Mora om
+            {t("plan.inMoraAt")}
           </p>
           <p className="mt-1 font-mono text-xl text-(--text-secondary)">
             {timeOfDay(plan.finishMin)}
@@ -142,8 +141,8 @@ export default function PlanPage() {
             }`}
           >
             {subTen
-              ? `${elapsedToClock(600 - plan.finishMin)} onder sub-10`
-              : `${elapsedToClock(plan.finishMin - 600)} boven sub-10`}
+              ? t("plan.underSubTen", { t: elapsedToClock(600 - plan.finishMin) })
+              : t("plan.overSubTen", { t: elapsedToClock(plan.finishMin - 600) })}
           </p>
         </div>
       </div>
@@ -153,11 +152,10 @@ export default function PlanPage() {
       {/* Compact strip — the minimal version you'd laminate or wear on a wrist. */}
       <div className="rounded-xl card-elevated bg-(--bg-card) p-4 sm:p-5">
         <h3 className="text-sm font-medium text-(--text-muted)">
-          Onderarm-strook
+          {t("plan.strip")}
         </h3>
         <p className="mt-1 text-xs text-(--text-muted)">
-          De kale versie om te lamineren of als plak-tattoo te dragen: post, km
-          en streeftijd op de klok.
+          {t("plan.stripIntro")}
         </p>
         <div className="mt-4 overflow-x-auto">
           <div className="inline-flex min-w-full items-stretch divide-x divide-(--border-secondary) rounded-lg border border-(--border-secondary) font-mono">
@@ -186,7 +184,7 @@ export default function PlanPage() {
       {/* Future: link to a print/laminate/temporary-tattoo shop. */}
       <div className="rounded-xl border border-dashed border-(--border-primary) bg-(--bg-card) p-4 text-center sm:p-5 print:hidden">
         <p className="text-xs text-(--text-muted)">
-          Binnenkort: deze strook laten lamineren of als plak-tattoo bestellen.
+          {t("plan.shopSoon")}
         </p>
       </div>
     </div>

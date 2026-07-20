@@ -16,10 +16,12 @@ export type Locale = "nl" | "sv";
 
 const messages: Record<Locale, typeof nl> = { nl, sv };
 
+export type TParams = Record<string, string | number>;
+
 interface I18nContext {
   locale: Locale;
   setLocale: (l: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: TParams) => string;
 }
 
 const Ctx = createContext<I18nContext>({
@@ -29,17 +31,26 @@ const Ctx = createContext<I18nContext>({
 });
 
 /**
- * Resolve a dot-separated key like "home.countdown.days"
- * from the nested JSON structure.
+ * Resolve a dot-separated key like "home.countdown.days" from the nested JSON,
+ * then fill any {name} placeholders from params. Missing keys return the key so
+ * gaps are visible rather than silent.
  */
-function resolve(obj: Record<string, unknown>, key: string): string {
+function resolve(
+  obj: Record<string, unknown>,
+  key: string,
+  params?: TParams
+): string {
   const parts = key.split(".");
   let current: unknown = obj;
   for (const part of parts) {
     if (current == null || typeof current !== "object") return key;
     current = (current as Record<string, unknown>)[part];
   }
-  return typeof current === "string" ? current : key;
+  if (typeof current !== "string") return key;
+  if (!params) return current;
+  return current.replace(/\{(\w+)\}/g, (m, name) =>
+    name in params ? String(params[name]) : m
+  );
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {
@@ -59,7 +70,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const t = useCallback(
-    (key: string) => resolve(messages[locale] as unknown as Record<string, unknown>, key),
+    (key: string, params?: TParams) =>
+      resolve(messages[locale] as unknown as Record<string, unknown>, key, params),
     [locale]
   );
 
