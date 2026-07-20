@@ -19,6 +19,8 @@
     "raceDay": "Race Day",
     "racePlan": "Raceplan",
     "racePlanDesc": "Checkpointschema en voeding voor sub 10 uur",
+    "followLive": "Volg mij live",
+    "followLiveText": "Op raceday kun je mij volgen via de officiële Vasaloppet-app: je krijgt een melding bij elke checkpoint en de finish. Deelnemers volgen kost eenmalig ~45 SEK en kan zodra de startlijst er is.",
     "verdict": {
       "title": "Zit ik op koers?",
       "onTrack": "Op koers voor sub-10 uur",

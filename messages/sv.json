@@ -19,6 +19,8 @@
     "raceDay": "Tävlingsdag",
     "racePlan": "Tävlingsplan",
     "racePlanDesc": "Checkpointschema och nutrition för under 10 timmar",
+    "followLive": "Följ mig live",
+    "followLiveText": "På tävlingsdagen kan du följa mig via den officiella Vasaloppet-appen: du får en notis vid varje kontroll och i mål. Att följa deltagare kostar en engångsavgift på ~45 SEK och går när startlistan finns.",
     "verdict": {
       "title": "Ligger jag i fas?",
       "onTrack": "I fas för under 10 timmar",

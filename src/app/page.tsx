@@ -146,6 +146,41 @@ export default function Home() {
           </div>
         </Link>
       </div>
+
+      {/* ─── Follow live via the official Vasaloppet app ─── */}
+      <div className="card-elevated rounded-xl bg-(--bg-card) p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-(--accent-orange-light) text-(--accent-orange)">
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div className="min-w-0">
+            <p className="font-medium text-(--text-primary)">{t("home.followLive")}</p>
+            <p className="mt-1 text-xs leading-relaxed text-(--text-muted)">
+              {t("home.followLiveText")}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <a
+                href="https://apps.apple.com/app/the-official-vasaloppet-app/id1526067927"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md border border-(--border-primary) px-3 py-1.5 text-xs font-medium text-(--text-secondary) transition-colors hover:bg-(--bg-card-hover)"
+              >
+                App Store
+              </a>
+              <a
+                href="https://play.google.com/store/apps/details?id=de.mikatiming.vasaloppet"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-md border border-(--border-primary) px-3 py-1.5 text-xs font-medium text-(--text-secondary) transition-colors hover:bg-(--bg-card-hover)"
+              >
+                Google Play
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
