@@ -325,9 +325,18 @@ export const TARGET_TOTAL_MIN = TARGET_HOURS * 60;
 // ~60 km forest road, 18 km trail, 6 km gravel and 6 km asphalt.
 export const COURSE_ASCENT_M = 867;
 
-// Nine aid stations. The original 35 min (~4 min each) is optimistic for a
-// first 92 km; 45 min still assumes you keep moving with intent.
-export const AID_STATION_MIN = 45;
+// Time spent not running. Dennis races self-supported: carries food and drink,
+// has crew resupplying at halfway, and keeps moving through the stations —
+// standing at most a few minutes and only when something runs out. So this is
+// single-digit minutes on a disciplined day, not the 45 a stand-at-every-station
+// runner loses. The band is the honest part: the low end assumes it all goes to
+// plan, the high end leaves room for a bad patch (a walk break, a toilet stop,
+// fumbling at a feed).
+const AID_MIN = { low: 6, mid: 10, high: 20 } as const;
+
+// Single planning value, used by the sub-10 checkpoint schedule and the pace
+// the goal requires once standing time is removed.
+export const AID_STATION_MIN = AID_MIN.mid;
 
 // Required moving pace to hit the goal once aid-station time is removed.
 export const TARGET_PACE = (TARGET_TOTAL_MIN - AID_STATION_MIN) / RACE_DISTANCE_KM;
@@ -395,14 +404,15 @@ function estimate(
   basisMovingMin: number,
   trainingAscentPerKm: number,
   exponent: number,
-  surfacePenalty: number
+  surfacePenalty: number,
+  aidMin: number
 ): number {
   const moving = basisMovingMin * Math.pow(RACE_DISTANCE_KM / basisKm, exponent);
   const surface = moving * surfacePenalty;
   const alreadyInBasis = trainingAscentPerKm * RACE_DISTANCE_KM;
   const excessAscent = Math.max(0, COURSE_ASCENT_M - alreadyInBasis);
   const climb = (excessAscent / 100) * CLIMB_MIN_PER_100M;
-  return moving + surface + climb + AID_STATION_MIN;
+  return moving + surface + climb + aidMin;
 }
 
 const NO_PROJECTION: FinishProjection = {
@@ -462,16 +472,17 @@ export function projectFinishFrom(
         ) / withElevation.length
       : FALLBACK_ASCENT_M_PER_KM;
 
-  const at = (exponent: number, penalty: number) =>
+  const at = (exponent: number, penalty: number, aidMin: number) =>
     estimate(
       basis.distanceKm,
       basis.movingTimeMin,
       trainingAscentPerKm,
       exponent,
-      penalty
+      penalty,
+      aidMin
     );
 
-  const projectedTotalMin = at(RIEGEL.mid, SURFACE_PENALTY.mid);
+  const projectedTotalMin = at(RIEGEL.mid, SURFACE_PENALTY.mid, AID_MIN.mid);
 
   // The pace tile keeps its own meaning: recent long-run average, which is a
   // training stat rather than the projection basis.
@@ -485,8 +496,8 @@ export function projectFinishFrom(
     projectedTotalMin,
     diffMin: projectedTotalMin - TARGET_TOTAL_MIN,
     isOnTarget: projectedTotalMin <= TARGET_TOTAL_MIN,
-    lowMin: at(RIEGEL.low, SURFACE_PENALTY.low),
-    highMin: at(RIEGEL.high, SURFACE_PENALTY.high),
+    lowMin: at(RIEGEL.low, SURFACE_PENALTY.low, AID_MIN.low),
+    highMin: at(RIEGEL.high, SURFACE_PENALTY.high, AID_MIN.high),
     basisKm: basis.distanceKm,
     basisDate: basis.date,
     basisHr: basis.heartrate,

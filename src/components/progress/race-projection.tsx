@@ -111,7 +111,7 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
         Op basis van je langste duurloop ({projection.basisKm.toFixed(1)} km),
         doorgerekend naar {RACE_KM} km inclusief verval over die afstand.
         Uitgangspunt: {COURSE_ASCENT_M} m stijging, grotendeels bosweg en trail,
-        ~{AID_STATION_MIN} min bij de aid stations. Realistische bandbreedte:{" "}
+        ~{AID_STATION_MIN} min stilstand (self-supported, doorlopend). Realistische bandbreedte:{" "}
         {formatTime(projection.lowMin)}&ndash;{formatTime(projection.highMin)}.
       </p>
 
@@ -270,8 +270,10 @@ export function RaceProjection({ longRuns, allActivities }: Props) {
             duurloop vast. Bovenop die tijd komt de {COURSE_ASCENT_M} m stijging van
             het parcours, een toeslag voor ondergrond (het parcours is grotendeels
             bosweg, trail en grind &mdash; jij traint vrijwel alleen op asfalt) en
-            ~{AID_STATION_MIN} minuten stilstand bij de aid stations. Voor sub 10 uur
-            heb je een moving pace nodig van {formatPace(TARGET_PACE)}/km of sneller.
+            ~{AID_STATION_MIN} minuten stilstand &mdash; je loopt self-supported, neemt
+            eten en drinken mee, hebt bevoorrading op de helft en blijft in beweging,
+            dus geen 45 min bij posten. Voor sub 10 uur heb je een moving pace nodig
+            van {formatPace(TARGET_PACE)}/km of sneller.
           </p>
           <p className="mt-2 text-xs leading-relaxed text-(--text-muted)">
             De bandbreedte {formatTime(projection.lowMin)}&ndash;{formatTime(projection.highMin)}{" "}
