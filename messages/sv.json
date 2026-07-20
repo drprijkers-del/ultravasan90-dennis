@@ -71,7 +71,9 @@
       "kmPerWeek": "Kilometer per vecka",
       "weeksTotal": "veckor totalt",
       "last4Detail": "Senaste 4 veckorna individuellt, äldre veckor som snitt.",
-      "targetZone": "Grön zon = målvolym"
+      "targetZone": "Grön zon = målvolym",
+      "avgWeeks": "Snitt V1–{n}",
+      "rangeNote": "Grön zon = målvolym ({min}–{max} km/vecka)"
     },
     "tempo": {
       "title": "Tempo & effektivitet",
@@ -90,7 +92,9 @@
       "slightlyAbove": "Något över",
       "aboveTarget": "Över mål",
       "olderRuns": "Äldre distanspass",
-      "trendTitle": "Tempo- & pulstrend"
+      "trendTitle": "Tempo- & pulstrend",
+      "trendDesc": "Blå = tempo (lägre är snabbare). Orange = puls. Grön linje = måltempo under 10h ({pace}/km).",
+      "hrFull": "Puls"
     },
     "readiness": {
       "title": "Tolkning (indikativ)",
@@ -122,6 +126,8 @@
     "weekOverview": "Veckoöversikt",
     "clickToExpand": "Klicka på en vecka för att se individuella pass.",
     "weeks2025": "2025",
+    "dayNames": "sö,må,ti,on,to,fr,lö",
+    "noActivitiesWeek": "Inga aktiviteter för denna vecka.",
     "noData": "Ingen data hittades.",
     "demo": "Demoläge — dummydata visas."
   },
@@ -184,6 +190,9 @@
     "kmPerWeek": "km/vecka",
     "minPerKm": "min/km",
     "weeks": "veckor",
-    "longRun": "distanspass"
+    "longRun": "distanspass",
+    "runs": "pass",
+    "avg": "snitt",
+    "longRunBadge": "långpass"
   }
 }

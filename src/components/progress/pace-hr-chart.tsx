@@ -14,7 +14,10 @@ import {
 } from "recharts";
 import { colors, tooltipStyle, gridStroke } from "@/lib/theme";
 import { formatPace, RACE_DISTANCE_KM } from "@/lib/race-config";
+import { useT, useI18n } from "@/lib/i18n";
 import type { ActivityData } from "@/lib/types";
+
+const dateLocale = (l: string) => (l === "sv" ? "sv-SE" : "nl-NL");
 
 // Color-blind safe pair: blue + orange
 const PACE_COLOR = "#2563eb"; // blue-600
@@ -30,16 +33,18 @@ interface Props {
   data: ActivityData[];
 }
 
-function getStatus(pace: number, target: number): { label: string; color: string } {
+function getStatus(pace: number, target: number): { key: string; color: string } {
   const diff = pace - target;
-  if (diff <= -0.15) return { label: "Sneller", color: "text-(--accent)" };
-  if (diff <= 0.15) return { label: "Op schema", color: "text-(--accent)" };
-  if (diff <= 0.5) return { label: "Iets boven", color: "text-(--accent-2-text)" };
-  return { label: "Boven doel", color: "text-(--danger)" };
+  if (diff <= -0.15) return { key: "faster", color: "text-(--accent)" };
+  if (diff <= 0.15) return { key: "onTrack", color: "text-(--accent)" };
+  if (diff <= 0.5) return { key: "slightlyAbove", color: "text-(--accent-2-text)" };
+  return { key: "aboveTarget", color: "text-(--danger)" };
 }
 
 function RunRow({ d, hasHr }: { d: ActivityData; hasHr: boolean }) {
-  const dateStr = new Date(d.date).toLocaleDateString("nl-NL", {
+  const t = useT();
+  const { locale } = useI18n();
+  const dateStr = new Date(d.date).toLocaleDateString(dateLocale(locale), {
     day: "numeric",
     month: "short",
   });
@@ -65,15 +70,19 @@ function RunRow({ d, hasHr }: { d: ActivityData; hasHr: boolean }) {
         </td>
       )}
       <td className={`px-4 py-2.5 text-right text-xs font-medium sm:px-5 ${status.color}`}>
-        {status.label}
+        {t(`progress.tempo.${status.key}`)}
       </td>
     </tr>
   );
 }
 
 export function PaceHrChart({ data }: Props) {
+  const t = useT();
+  const { locale } = useI18n();
   const [showOlder, setShowOlder] = useState(false);
   const hasHr = data.some((d) => d.heartrate != null && d.heartrate > 0);
+  const paceLabel = t("progress.tempo.pace");
+  const hrLabel = t("progress.tempo.hrFull");
   if (data.length === 0) return null;
 
   // Sort newest first for the table
@@ -92,7 +101,7 @@ export function PaceHrChart({ data }: Props) {
   const chartData = [...data]
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .map((d) => ({
-      date: new Date(d.date).toLocaleDateString("nl-NL", { day: "numeric", month: "short" }),
+      date: new Date(d.date).toLocaleDateString(dateLocale(locale), { day: "numeric", month: "short" }),
       paceMinKm: d.paceMinKm,
       heartrate: d.heartrate,
     }));
@@ -103,10 +112,11 @@ export function PaceHrChart({ data }: Props) {
       <div className="rounded-xl card-elevated bg-(--bg-card) overflow-hidden">
         <div className="px-4 py-3 sm:px-5">
           <h3 className="text-sm font-medium text-(--text-secondary)">
-            Duurloop tempo vs. doeltempo
+            {t("progress.tempo.vsTarget")}
           </h3>
           <p className="mt-0.5 text-[10px] text-(--text-muted)">
-            Doeltempo sub 10h: {formatPace(TARGET_PACE)}/km. Lager = sneller.
+            {t("progress.tempo.targetPace")}: {formatPace(TARGET_PACE)}/km.{" "}
+            {t("progress.tempo.lowerIsFaster")}.
           </p>
         </div>
 
@@ -114,12 +124,12 @@ export function PaceHrChart({ data }: Props) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-t border-(--border-primary) bg-(--bg-inset) text-[10px] font-medium uppercase tracking-wider text-(--text-muted)">
-                <th className="px-4 py-2 text-left sm:px-5">Datum</th>
-                <th className="px-2 py-2 text-left">Afstand</th>
-                <th className="px-2 py-2 text-right">Tempo</th>
-                <th className="px-2 py-2 text-right">Doel</th>
-                {hasHr && <th className="hidden px-2 py-2 text-right sm:table-cell">HR</th>}
-                <th className="px-4 py-2 text-right sm:px-5">Status</th>
+                <th className="px-4 py-2 text-left sm:px-5">{t("progress.tempo.date")}</th>
+                <th className="px-2 py-2 text-left">{t("progress.tempo.distance")}</th>
+                <th className="px-2 py-2 text-right">{t("progress.tempo.pace")}</th>
+                <th className="px-2 py-2 text-right">{t("progress.tempo.target")}</th>
+                {hasHr && <th className="hidden px-2 py-2 text-right sm:table-cell">{t("progress.tempo.hr")}</th>}
+                <th className="px-4 py-2 text-right sm:px-5">{t("progress.tempo.status")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-(--border-primary)">
@@ -145,7 +155,7 @@ export function PaceHrChart({ data }: Props) {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
-              Oudere duurlopen ({older.length})
+              {t("progress.tempo.olderRuns")} ({older.length})
             </button>
 
             {showOlder && (
@@ -167,11 +177,10 @@ export function PaceHrChart({ data }: Props) {
       {hasHr && (
         <div className="rounded-xl card-elevated bg-(--bg-card) p-4 sm:p-5">
           <h3 className="mb-1 text-sm font-medium text-(--text-secondary)">
-            Tempo &amp; hartslag trend
+            {t("progress.tempo.trendTitle")}
           </h3>
           <p className="mb-4 text-[10px] text-(--text-muted)">
-            Blauw = tempo (lager is sneller). Oranje = hartslag.
-            Groene lijn = doeltempo sub 10h ({formatPace(TARGET_PACE)}/km).
+            {t("progress.tempo.trendDesc", { pace: formatPace(TARGET_PACE) })}
           </p>
           <ResponsiveContainer width="100%" height={240}>
             <ComposedChart data={chartData}>
@@ -208,10 +217,10 @@ export function PaceHrChart({ data }: Props) {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 formatter={(value: any, name: any) => {
                   if (value == null) return ["\u2014", name ?? ""];
-                  if (name === "Tempo") return [formatPace(value as number), name];
+                  if (name === paceLabel) return [formatPace(value as number), name];
                   return [`${Math.round(value as number)} bpm`, name ?? ""];
                 }}
-                labelFormatter={(label) => `Datum: ${label}`}
+                labelFormatter={(label) => `${t("progress.tempo.date")}: ${label}`}
               />
 
               <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} />
@@ -223,7 +232,7 @@ export function PaceHrChart({ data }: Props) {
                 stroke={PACE_COLOR}
                 strokeWidth={2}
                 dot={{ r: 3, fill: PACE_COLOR }}
-                name="Tempo"
+                name={paceLabel}
               />
               <Line
                 yAxisId="hr"
@@ -234,7 +243,7 @@ export function PaceHrChart({ data }: Props) {
                 strokeDasharray="6 3"
                 dot={{ r: 3, fill: HR_COLOR }}
                 connectNulls
-                name="Hartslag"
+                name={hrLabel}
               />
 
               <ReferenceLine
@@ -244,7 +253,7 @@ export function PaceHrChart({ data }: Props) {
                 strokeWidth={2}
                 strokeDasharray="8 4"
                 label={{
-                  value: `Doel: ${formatPace(TARGET_PACE)}`,
+                  value: `${t("progress.tempo.target")}: ${formatPace(TARGET_PACE)}`,
                   position: "right",
                   fill: TARGET_COLOR,
                   fontSize: 10,

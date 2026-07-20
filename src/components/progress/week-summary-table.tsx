@@ -2,7 +2,10 @@
 
 import { useState, useMemo } from "react";
 import { formatPace, formatDuration } from "@/lib/race-config";
+import { useT, useI18n } from "@/lib/i18n";
 import type { WeeklyData, ActivityData } from "@/lib/types";
+
+const dateLocale = (l: string) => (l === "sv" ? "sv-SE" : "nl-NL");
 
 interface Props {
   data: WeeklyData[];
@@ -25,9 +28,10 @@ function getISOWeekLabel(date: Date): string {
   return `W${weekNum}`;
 }
 
-const dayNames = ["zo", "ma", "di", "wo", "do", "vr", "za"];
-
 export function WeekSummaryTable({ data, activities }: Props) {
+  const t = useT();
+  const { locale } = useI18n();
+  const dayNames = t("progress.dayNames").split(",");
   const [openWeek, setOpenWeek] = useState<string | null>(null);
   const [show2025, setShow2025] = useState(false);
 
@@ -92,7 +96,7 @@ export function WeekSummaryTable({ data, activities }: Props) {
           </span>
 
           <span className="w-14 shrink-0 text-right text-xs text-(--text-muted)">
-            {week.runCount} runs
+            {week.runCount} {t("common.runs")}
           </span>
 
           <span className="hidden w-14 shrink-0 text-right font-mono text-xs text-(--text-muted) sm:block">
@@ -118,14 +122,14 @@ export function WeekSummaryTable({ data, activities }: Props) {
           <div className="border-t border-(--border-primary) bg-(--bg-primary)">
             {weekActivities.length === 0 ? (
               <p className="px-4 py-4 text-center text-xs text-(--text-muted) sm:px-5">
-                Geen activiteiten gevonden voor deze week.
+                {t("progress.noActivitiesWeek")}
               </p>
             ) : (
               <div className="divide-y divide-(--border-primary)">
                 {weekActivities.map((act) => {
                   const d = new Date(act.date);
                   const dayName = dayNames[d.getDay()];
-                  const dateStr = d.toLocaleDateString("nl-NL", {
+                  const dateStr = d.toLocaleDateString(dateLocale(locale), {
                     day: "numeric",
                     month: "short",
                   });
@@ -144,7 +148,7 @@ export function WeekSummaryTable({ data, activities }: Props) {
                         {act.name}
                         {act.isLongRun && (
                           <span className="ml-1.5 inline-block rounded bg-(--accent-orange-light) px-1.5 py-0.5 text-[10px] font-medium text-(--accent-orange-text)">
-                            long run
+                            {t("common.longRunBadge")}
                           </span>
                         )}
                       </span>
@@ -191,10 +195,10 @@ export function WeekSummaryTable({ data, activities }: Props) {
     <div className="rounded-xl card-elevated bg-(--bg-card)">
       <div className="px-4 py-3 sm:px-5">
         <h3 className="text-sm font-medium text-(--text-muted)">
-          Weekoverzicht ({data.length} weken)
+          {t("progress.weekOverview")} ({data.length} {t("common.weeks")})
         </h3>
         <p className="mt-1 text-xs text-(--text-muted)">
-          Klik op een week om de individuele trainingen te bekijken.
+          {t("progress.clickToExpand")}
         </p>
       </div>
 
@@ -220,11 +224,11 @@ export function WeekSummaryTable({ data, activities }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
               <span className="font-medium text-(--text-secondary)">
-                2025 ({weeks2025.length} weken)
+                {t("progress.weeks2025")} ({weeks2025.length} {t("common.weeks")})
               </span>
               {summary2025 && (
                 <span className="text-(--text-muted)">
-                  {summary2025.totalKm.toFixed(0)} km &middot; {summary2025.totalRuns} runs &middot; gem. {formatPace(summary2025.avgPace)}/km
+                  {summary2025.totalKm.toFixed(0)} km &middot; {summary2025.totalRuns} {t("common.runs")} &middot; {t("common.avg")} {formatPace(summary2025.avgPace)}/km
                 </span>
               )}
             </button>

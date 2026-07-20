@@ -71,7 +71,9 @@
       "kmPerWeek": "Kilometers per week",
       "weeksTotal": "weken totaal",
       "last4Detail": "Laatste 4 weken individueel, oudere weken als gemiddelde.",
-      "targetZone": "Groene zone = doelvolume"
+      "targetZone": "Groene zone = doelvolume",
+      "avgWeeks": "Gem. W1–{n}",
+      "rangeNote": "Groene zone = doelvolume ({min}–{max} km/week)"
     },
     "tempo": {
       "title": "Tempo & efficiëntie",
@@ -90,7 +92,9 @@
       "slightlyAbove": "Iets boven",
       "aboveTarget": "Boven doel",
       "olderRuns": "Oudere duurlopen",
-      "trendTitle": "Tempo & hartslag trend"
+      "trendTitle": "Tempo & hartslag trend",
+      "trendDesc": "Blauw = tempo (lager is sneller). Oranje = hartslag. Groene lijn = doeltempo sub 10h ({pace}/km).",
+      "hrFull": "Hartslag"
     },
     "readiness": {
       "title": "Interpretatie (indicatief)",
@@ -122,6 +126,8 @@
     "weekOverview": "Weekoverzicht",
     "clickToExpand": "Klik op een week om de individuele trainingen te bekijken.",
     "weeks2025": "2025",
+    "dayNames": "zo,ma,di,wo,do,vr,za",
+    "noActivitiesWeek": "Geen activiteiten gevonden voor deze week.",
     "noData": "Geen data gevonden.",
     "demo": "Demo modus — dummy data wordt getoond."
   },
@@ -184,6 +190,9 @@
     "kmPerWeek": "km/week",
     "minPerKm": "min/km",
     "weeks": "weken",
-    "longRun": "long run"
+    "longRun": "long run",
+    "runs": "runs",
+    "avg": "gem.",
+    "longRunBadge": "long run"
   }
 }

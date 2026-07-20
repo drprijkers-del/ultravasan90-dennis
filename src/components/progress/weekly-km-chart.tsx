@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { colors, tooltipStyle, gridStroke } from "@/lib/theme";
 import { TARGET_BAND } from "@/lib/race-config";
+import { useT } from "@/lib/i18n";
 import type { WeeklyData } from "@/lib/types";
 
 interface Props {
@@ -26,7 +27,7 @@ interface ChartRow {
   isAverage: boolean;
 }
 
-function buildChartData(data: WeeklyData[]): ChartRow[] {
+function buildChartData(data: WeeklyData[], avgLabel: string): ChartRow[] {
   if (data.length <= 4) {
     return data.map((d) => ({
       label: d.label,
@@ -44,7 +45,7 @@ function buildChartData(data: WeeklyData[]): ChartRow[] {
 
   const rows: ChartRow[] = [
     {
-      label: `Gem. W1–${older.length}`,
+      label: avgLabel,
       totalKm: Math.round(avgKm * 10) / 10,
       runCount: avgRuns,
       isAverage: true,
@@ -61,21 +62,29 @@ function buildChartData(data: WeeklyData[]): ChartRow[] {
 }
 
 export function WeeklyKmChart({ data }: Props) {
-  const chartData = buildChartData(data);
+  const t = useT();
+  const olderCount = Math.max(0, data.length - 4);
+  const chartData = buildChartData(
+    data,
+    t("progress.volume.avgWeeks", { n: olderCount })
+  );
 
   return (
     <div className="rounded-xl card-elevated bg-(--bg-card) p-4 sm:p-5">
       <div className="mb-1 flex items-center justify-between">
         <h3 className="text-sm font-medium text-(--text-secondary)">
-          Kilometers per week
+          {t("progress.volume.kmPerWeek")}
         </h3>
         <span className="text-xs text-(--text-muted)">
-          {data.length} weken totaal
+          {data.length} {t("progress.volume.weeksTotal")}
         </span>
       </div>
       <p className="mb-4 text-[10px] text-(--text-muted)">
-        Laatste 4 weken individueel, oudere weken als gemiddelde.
-        Groene zone = doelvolume ({TARGET_BAND.min}&ndash;{TARGET_BAND.max} km/week).
+        {t("progress.volume.last4Detail")}{" "}
+        {t("progress.volume.rangeNote", {
+          min: TARGET_BAND.min,
+          max: TARGET_BAND.max,
+        })}
       </p>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={chartData}>
@@ -109,7 +118,7 @@ export function WeeklyKmChart({ data }: Props) {
               const row = props?.payload as ChartRow | undefined;
               const v = value as number;
               return [
-                `${v.toFixed(1)} km · ${row?.runCount ?? 0} runs${row?.isAverage ? " (gem.)" : ""}`,
+                `${v.toFixed(1)} km · ${row?.runCount ?? 0} ${t("common.runs")}${row?.isAverage ? ` (${t("common.avg")})` : ""}`,
                 "",
               ];
             }}
