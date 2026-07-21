@@ -22,6 +22,21 @@ export const HEAT_NEUTRAL_C = 15;
 export const DEFAULT_TEMP_C = HEAT_NEUTRAL_C;
 const HEAT_PCT_PER_C = 0.4;
 
+// Fuelling. The race-day challenge is avoiding a carbohydrate deficit — the 50k
+// fade was empty-tank, not fitness. Target carbs/hour is the knob; gels are the
+// primary vehicle, with sports drink assumed to cover a steady baseline so gels
+// fill the rest. Assumptions, all tunable at the top here:
+export const DEFAULT_CARBS_PER_HOUR = 70; // g/h target
+export const GEL_CARBS = 22; // SiS GO Isotonic, g each
+const DRINK_CARBS_PER_HOUR = 25; // g/h from sipping the 2:1 flask
+const FLUID_L_PER_HOUR = 0.6; // baseline; more in heat
+export const VEST_GELS = 18; // gels carried at the start
+// Partner meets near halfway to reset flasks and gels; the checkpoint at/after
+// this distance is flagged. Evertsberg (47 km) is the classic mid-point.
+const PARTNER_KM = RACE_KM / 2;
+// Past this point gels turn sickening — stations should push real food.
+const REAL_FOOD_FROM_KM = 60;
+
 function heatFactor(tempC: number): number {
   return 1 + (Math.max(0, tempC - HEAT_NEUTRAL_C) * HEAT_PCT_PER_C) / 100;
 }
@@ -80,17 +95,21 @@ export function timeOfDay(min: number): string {
   return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 }
 
-// Carbs come in from the first station and keep coming — the point is not to
-// wait for the legs to complain. Stations sit ~11 km apart, further than one
-// gel covers, so the plan carries gels for the gaps and refills/eats on arrival.
-// Returns an i18n key suffix; the component resolves it under `plan.*`.
-export type FuelKey = "fuelNone" | "fuelFirst" | "fuelStation" | "fuelFinish";
+// Fuel action per checkpoint, as an i18n key suffix resolved under `plan.*`.
+// The concrete gel count is carried separately on the row.
+export type FuelKey =
+  | "fuelStart"
+  | "fuelDrink"
+  | "fuelPartner"
+  | "fuelFood"
+  | "fuelFinish";
 
-function fuelNote(idx: number, isFinish: boolean): FuelKey {
+function fuelAction(km: number, isFinish: boolean, isPartner: boolean): FuelKey {
   if (isFinish) return "fuelFinish";
-  if (idx === 0) return "fuelNone";
-  if (idx === 1) return "fuelFirst";
-  return "fuelStation";
+  if (km === 0) return "fuelStart";
+  if (isPartner) return "fuelPartner";
+  if (km >= REAL_FOOD_FROM_KM) return "fuelFood";
+  return "fuelDrink";
 }
 
 export interface PlanRow {
@@ -101,6 +120,8 @@ export interface PlanRow {
   /** Cumulative elapsed minutes from the start. */
   arrival: number;
   isFinish: boolean;
+  /** Gels to take in the segment leading into this checkpoint. */
+  gels: number;
   /** i18n key suffix resolved under `plan.*`. */
   fuel: FuelKey;
 }
@@ -116,20 +137,30 @@ export interface RacePlan {
   /** Minutes added by heat vs a neutral-temperature run (0 at/below 15C). */
   heatMin: number;
   finishMin: number;
+  // --- Fuelling ---
+  carbsPerHour: number;
+  /** Total carbohydrate over the race, g. */
+  totalCarbs: number;
+  /** Total gels the plan calls for. */
+  totalGels: number;
+  /** Gels carried in the vest at the start. */
+  vestGels: number;
+  /** Total fluid, litres (baseline; more in heat). */
+  fluidL: number;
 }
 
 /**
- * Build the checkpoint schedule for a chosen running pace, total standing time
- * and expected temperature. Moving time is even by distance at the heat-adjusted
- * pace; `aidTotalMin` is spread evenly across the stations reached so far. This
- * is a target/deadline plan, not the fade-aware projection on the progress page
- * — even splits are what you pace off, and the first half being hillier is a
- * caveat, not a per-segment model.
+ * Build the checkpoint schedule for a chosen running pace, standing time,
+ * temperature and carbohydrate target. Moving time is redistributed across
+ * segments by terrain (fixed total); each segment's gel count comes from its
+ * duration and the carbs/hour target, with sports drink assumed to cover a
+ * steady baseline so gels fill the remainder.
  */
 export function computePlan(
   basePaceMinKm: number,
   aidTotalMin: number,
-  tempC: number = DEFAULT_TEMP_C
+  tempC: number = DEFAULT_TEMP_C,
+  carbsPerHour: number = DEFAULT_CARBS_PER_HOUR
 ): RacePlan {
   const paceMinKm = basePaceMinKm * heatFactor(tempC);
   const aidPerStation = aidTotalMin / AID_STATIONS;
@@ -145,7 +176,17 @@ export function computePlan(
   });
   const totalEffort = segments.reduce((s, x) => s + x.effort, 0);
 
+  // Gels cover the carb target above what the drink baseline supplies.
+  const gelCarbsPerHour = Math.max(0, carbsPerHour - DRINK_CARBS_PER_HOUR);
+
+  // The first checkpoint at/after halfway is the partner reset.
+  const partnerIdx = ULTRAVASAN_CHECKPOINTS.findIndex(
+    (cp, i) => i > 0 && cp.km >= PARTNER_KM
+  );
+
   let cumMoving = 0;
+  let prevArrival = 0;
+  let totalGels = 0;
   const rows: PlanRow[] = ULTRAVASAN_CHECKPOINTS.map((cp, idx) => {
     const isFinish = idx === ULTRAVASAN_CHECKPOINTS.length - 1;
     const stationsReached = Math.min(idx, AID_STATIONS);
@@ -155,15 +196,23 @@ export function computePlan(
     const arrival = cumMoving + stationsReached * aidPerStation;
     const seg = idx > 0 ? segments[idx - 1] : null;
     const segMoving = seg ? (seg.effort / totalEffort) * movingBudget : 0;
+    const segHours = (arrival - prevArrival) / 60;
+    const gels = idx === 0 ? 0 : Math.round((gelCarbsPerHour * segHours) / GEL_CARBS);
+    prevArrival = arrival;
+    totalGels += gels;
     return {
       name: cp.name,
       km: cp.km,
       segPace: seg && seg.dist > 0 ? segMoving / seg.dist : 0,
       arrival,
       isFinish,
-      fuel: fuelNote(idx, isFinish),
+      gels,
+      fuel: fuelAction(cp.km, isFinish, idx === partnerIdx),
     };
   });
+
+  const finishMin = movingBudget + aidTotalMin;
+  const finishHours = finishMin / 60;
 
   return {
     rows,
@@ -172,6 +221,11 @@ export function computePlan(
     aidTotalMin,
     tempC,
     heatMin: (paceMinKm - basePaceMinKm) * RACE_KM,
-    finishMin: movingBudget + aidTotalMin,
+    finishMin,
+    carbsPerHour,
+    totalCarbs: Math.round(carbsPerHour * finishHours),
+    totalGels,
+    vestGels: VEST_GELS,
+    fluidL: Math.round(FLUID_L_PER_HOUR * finishHours * 10) / 10,
   };
 }

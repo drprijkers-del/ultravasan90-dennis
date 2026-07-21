@@ -38,6 +38,7 @@ const ALLOW = new Set([
   "common.minPerKm",
   "plan.colKm", // "km"
   "plan.colPace", // "Tempo"
+  "plan.gelUnit", // "{n}× gel" — "gel" is the same word
 ]);
 const suspect = nk.filter(
   (k) => k in S && String(N[k]) === String(S[k]) && !ALLOW.has(k) &&

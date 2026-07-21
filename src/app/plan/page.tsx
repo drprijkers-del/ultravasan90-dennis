@@ -11,6 +11,7 @@ import {
   DEFAULT_AID_MIN,
   DEFAULT_PACE_MIN_KM,
   DEFAULT_TEMP_C,
+  DEFAULT_CARBS_PER_HOUR,
 } from "@/lib/race-plan";
 
 const DEFAULT_PACE_SEC = Math.round(DEFAULT_PACE_MIN_KM * 60);
@@ -22,13 +23,15 @@ export default function PlanPage() {
   const [paceSec, setPaceSec] = useState<number>(DEFAULT_PACE_SEC);
   const [aidMin, setAidMin] = useState<number>(DEFAULT_AID_MIN);
   const [tempC, setTempC] = useState<number>(DEFAULT_TEMP_C);
+  const [carbs, setCarbs] = useState<number>(DEFAULT_CARBS_PER_HOUR);
 
-  const plan = computePlan(paceSec / 60, aidMin, tempC);
+  const plan = computePlan(paceSec / 60, aidMin, tempC, carbs);
   const subTen = plan.finishMin <= 600;
   const isDefault =
     paceSec === DEFAULT_PACE_SEC &&
     aidMin === DEFAULT_AID_MIN &&
-    tempC === DEFAULT_TEMP_C;
+    tempC === DEFAULT_TEMP_C &&
+    carbs === DEFAULT_CARBS_PER_HOUR;
 
   return (
     <div className="space-y-8">
@@ -57,6 +60,7 @@ export default function PlanPage() {
                 setPaceSec(DEFAULT_PACE_SEC);
                 setAidMin(DEFAULT_AID_MIN);
                 setTempC(DEFAULT_TEMP_C);
+                setCarbs(DEFAULT_CARBS_PER_HOUR);
               }}
               className="text-xs font-medium text-(--accent-orange) transition-opacity hover:opacity-80"
             >
@@ -65,7 +69,7 @@ export default function PlanPage() {
           )}
         </div>
 
-        <div className="mt-4 grid gap-5 sm:grid-cols-3">
+        <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {/* Pace */}
           <div>
             <div className="flex items-baseline justify-between">
@@ -143,6 +147,32 @@ export default function PlanPage() {
               <span>{t("plan.warm")}</span>
             </div>
           </div>
+
+          {/* Carbs per hour */}
+          <div>
+            <div className="flex items-baseline justify-between">
+              <label htmlFor="carbs" className="text-xs text-(--text-muted)">
+                {t("plan.carbsPerHour")}
+              </label>
+              <span className="font-mono text-sm font-bold text-(--text-primary)">
+                {carbs} g
+              </span>
+            </div>
+            <input
+              id="carbs"
+              type="range"
+              min={40}
+              max={90}
+              step={5}
+              value={carbs}
+              onChange={(e) => setCarbs(Number(e.target.value))}
+              className="mt-2 w-full accent-(--accent-orange)"
+            />
+            <div className="mt-1 flex justify-between text-[10px] text-(--text-muted)">
+              <span>{t("plan.less")}</span>
+              <span>{t("plan.more")}</span>
+            </div>
+          </div>
         </div>
 
         <p className="mt-4 text-[10px] leading-relaxed text-(--text-muted)">
@@ -192,6 +222,51 @@ export default function PlanPage() {
       </div>
 
       <CheckpointPacing plan={plan} />
+
+      {/* Fuelling plan */}
+      <div className="rounded-xl card-elevated bg-(--bg-card) p-4 sm:p-5">
+        <div className="flex items-baseline justify-between">
+          <h3 className="text-sm font-medium text-(--text-muted)">
+            {t("plan.fuelTitle")}
+          </h3>
+          <span className="font-mono text-sm font-bold text-(--accent-orange)">
+            {t("plan.fuelTotals", {
+              g: plan.totalCarbs,
+              gels: plan.totalGels,
+              fluid: plan.fluidL,
+            })}
+          </span>
+        </div>
+        <p
+          className={`mt-2 text-xs leading-relaxed ${
+            plan.totalGels > plan.vestGels
+              ? "text-(--accent-orange)"
+              : "text-(--accent)"
+          }`}
+        >
+          {plan.totalGels > plan.vestGels
+            ? t("plan.fuelVestGap", {
+                vest: plan.vestGels,
+                total: plan.totalGels,
+                gap: plan.totalGels - plan.vestGels,
+              })
+            : t("plan.fuelVestOk", { vest: plan.vestGels })}
+        </p>
+        <ul className="mt-3 space-y-1.5 text-[11px] leading-relaxed text-(--text-muted)">
+          <li className="flex gap-2">
+            <span className="text-(--text-muted)">&bull;</span>
+            {t("plan.fuelRhythm")}
+          </li>
+          <li className="flex gap-2">
+            <span className="text-(--text-muted)">&bull;</span>
+            {t("plan.fuelSodium")}
+          </li>
+          <li className="flex gap-2">
+            <span className="text-(--text-muted)">&bull;</span>
+            {t("plan.fuelCaveat", { carbs: plan.carbsPerHour })}
+          </li>
+        </ul>
+      </div>
 
       {/* Compact strip — the minimal version you'd laminate or wear on a wrist. */}
       <div className="rounded-xl card-elevated bg-(--bg-card) p-4 sm:p-5">

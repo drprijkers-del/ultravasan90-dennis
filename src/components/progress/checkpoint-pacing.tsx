@@ -2,7 +2,7 @@
 
 import { formatPace } from "@/lib/race-config";
 import { useT } from "@/lib/i18n";
-import { type RacePlan, elapsedToClock, timeOfDay } from "@/lib/race-plan";
+import { type RacePlan, VEST_GELS, elapsedToClock, timeOfDay } from "@/lib/race-plan";
 
 export function CheckpointPacing({ plan }: { plan: RacePlan }) {
   const t = useT();
@@ -61,7 +61,13 @@ export function CheckpointPacing({ plan }: { plan: RacePlan }) {
                   {r.segPace > 0 ? formatPace(r.segPace) : "—"}
                 </td>
                 <td className="px-4 py-2.5 text-left text-xs text-(--text-muted) sm:px-5">
-                  {t(`plan.${r.fuel}`)}
+                  {r.gels > 0 && (
+                    <span className="font-medium text-(--text-secondary)">
+                      {t("plan.gelUnit", { n: r.gels })}
+                    </span>
+                  )}
+                  {r.gels > 0 ? " · " : ""}
+                  {t(`plan.${r.fuel}`, { vest: VEST_GELS })}
                 </td>
               </tr>
             ))}
